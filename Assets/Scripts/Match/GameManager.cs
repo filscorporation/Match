@@ -4,12 +4,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    void Start()
-    {
-        
-    }
+    public CardManager CardManager;
 
-    void Update()
+    public void Start()
     {
         
     }
