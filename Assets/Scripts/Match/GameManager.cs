@@ -1,13 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class GameManager : MonoBehaviour
+namespace Assets.Scripts.Match
 {
-    public CardManager CardManager;
-
-    public void Start()
+    public class GameManager : MonoBehaviour
     {
-        
+        public CardManager CardManager;
+
+        public void Start()
+        {
+            StartGame();
+        }
+
+        public void StartGame()
+        {
+            CardManager = new CardManager();
+            CardManager.InitializeField(new FieldParams { Height = 3, Width = 3 });
+        }
     }
 }

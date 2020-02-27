@@ -1,16 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class UIManager : MonoBehaviour
+namespace Assets.Scripts.Match
 {
-    public void Start()
+    public class UIManager : MonoBehaviour
     {
+        public void Start()
+        {
         
-    }
+        }
 
-    public void Update()
-    {
+        public void Update()
+        {
         
+        }
     }
 }

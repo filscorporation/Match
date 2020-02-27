@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 
-public interface IUISubscriber
+namespace Assets.Scripts.Match
 {
-    void Handle(Vector3 click);
+    public interface IUISubscriber
+    {
+        void Handle(Vector3 click);
+    }
 }

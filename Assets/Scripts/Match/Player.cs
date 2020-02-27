@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class Player
+﻿namespace Assets.Scripts.Match
 {
+    public class Player
+    {
 
+    }
 }

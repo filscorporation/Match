@@ -1,16 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Card : MonoBehaviour
+namespace Assets.Scripts.Match
 {
-    public void Start()
+    public class Card : MonoBehaviour
     {
+        public void Start()
+        {
         
-    }
+        }
 
-    public void Update()
-    {
+        public void Update()
+        {
         
+        }
     }
 }
