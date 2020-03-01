@@ -4,6 +4,8 @@ namespace Assets.Scripts.Match
 {
     public class Card : MonoBehaviour
     {
+        public int Index;
+
         public void Start()
         {
         
