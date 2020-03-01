@@ -9,22 +9,31 @@ namespace Assets.Scripts.Match
 {
     public class CardManager : IUISubscriber
     {
+        private GameManager gameManager;
+
         private Card[][] cards;
+        private Card lastActive = null;
 
         private Transform fieldParent;
 
-        private const string cardImagesFolder = "Cards";
-        private const string defaultCardPackage = "Default";
+        private const string cardPacksFolder = "CardPacks";
+        private const string cardsFolder = "Cards";
+        private const string cardbackFileName = "CardBack";
         private const float portraitScaleFactor = 0.6F;
         private const float landscapeScaleFactor = 1F;
 
-        public void InitializeField(FieldParams prs)
+        public CardManager(GameManager gameManager)
+        {
+            this.gameManager = gameManager;
+        }
+
+        public void InitializeField(FieldParams prs, string cardPack)
         {
             Debug.Log("Start initializing field");
 
             ClearField();
             cards = new Card[prs.Height][];
-            List<Object> cardPrefabs = GetCardPrefabs(defaultCardPackage);
+            List<Object> cardPrefabs = GetCardPrefabs(cardPack);
             if (cardPrefabs.Count < prs.Width * prs.Height / 2)
                 throw new Exception("Not enougth images for field size");
 
@@ -84,13 +93,50 @@ namespace Assets.Scripts.Match
         {
             if (gameObject.TryGetComponent<Card>(out Card card))
             {
-                Debug.Log("Handling card click");
+                Debug.Log($"Handling card {card.Index}");
+                if (card.State == CardState.Unactive)
+                {
+                    card.State = CardState.Active;
+                }
+                if (lastActive == null)
+                {
+                    lastActive = card;
+                }
+                else
+                {
+                    if (lastActive != card && lastActive.Index == card.Index)
+                    {
+                        Debug.Log($"Match");
+                        Match(lastActive, card);
+                    }
+                    else
+                    {
+                        Debug.Log($"Unmatch");
+                        Unmatch(lastActive, card);
+                    }
+                    lastActive = null;
+                }
             }
+        }
+
+        private void Match(Card a, Card b)
+        {
+            gameManager.Score(); // TODO: passing player
+            a.State = CardState.Revealed;
+            b.State = CardState.Revealed;
+        }
+
+        private void Unmatch(Card a, Card b)
+        {
+            // TODO: delay
+            a.State = CardState.Unactive;
+            b.State = CardState.Unactive;
         }
 
         private List<Object> GetCardPrefabs(string packagePath)
         {
-            Sprite[] sprites = Resources.LoadAll<Sprite>(Path.Combine(cardImagesFolder, packagePath));
+            Sprite[] sprites = Resources.LoadAll<Sprite>(Path.Combine(cardPacksFolder, packagePath, cardsFolder));
+            Sprite cardbackSprite = Resources.Load<Sprite>(Path.Combine(cardPacksFolder, packagePath, cardbackFileName));
             if (sprites == null || sprites.Length == 0)
                 throw new ResourceLoadException("Error loading card prefab");
 
@@ -100,6 +146,12 @@ namespace Assets.Scripts.Match
                 GameObject prefab = new GameObject("Card");
                 SpriteRenderer sr = prefab.AddComponent<SpriteRenderer>();
                 sr.sprite = sprite;
+
+                GameObject back = new GameObject("CardBack");
+                back.transform.SetParent(prefab.transform);
+                back.transform.localPosition = new Vector3(0, 0, 0.01F);
+                sr = back.AddComponent<SpriteRenderer>();
+                sr.sprite = cardbackSprite;
 
                 if (prefab == null)
                     throw new Exception("Error creating card prefab");

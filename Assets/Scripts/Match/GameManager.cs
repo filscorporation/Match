@@ -12,6 +12,8 @@ namespace Assets.Scripts.Match
 
         private bool getInput = true;
 
+        private const string defaultCardPackage = "DefaultPack";
+
         public void Start()
         {
             StartGame();
@@ -25,10 +27,15 @@ namespace Assets.Scripts.Match
 
         public void StartGame()
         {
-            CardManager = new CardManager();
-            CardManager.InitializeField(new FieldParams { Height = 5, Width = 6 });
+            CardManager = new CardManager(this);
+            CardManager.InitializeField(new FieldParams { Height = 5, Width = 6 }, defaultCardPackage);
             InputManager = new PCInputManager();
             InputManager.AddSubscriber(CardManager);
+        }
+
+        public void Score()
+        {
+
         }
     }
 }
