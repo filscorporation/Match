@@ -94,6 +94,10 @@ namespace Assets.Scripts.Match
             if (gameObject.TryGetComponent<Card>(out Card card))
             {
                 Debug.Log($"Handling card {card.Index}");
+                if (lastActive == card)
+                    return;
+                if (card.State == CardState.Revealed)
+                    return;
                 if (card.State == CardState.Unactive)
                 {
                     card.State = CardState.Active;
@@ -104,7 +108,7 @@ namespace Assets.Scripts.Match
                 }
                 else
                 {
-                    if (lastActive != card && lastActive.Index == card.Index)
+                    if (lastActive.Index == card.Index)
                     {
                         Debug.Log($"Match");
                         Match(lastActive, card);
@@ -128,7 +132,6 @@ namespace Assets.Scripts.Match
 
         private void Unmatch(Card a, Card b)
         {
-            // TODO: delay
             a.State = CardState.Unactive;
             b.State = CardState.Unactive;
         }
@@ -178,7 +181,7 @@ namespace Assets.Scripts.Match
 
         private Card CreateCard(Object prefab, Vector2 position, float scale, int index)
         {
-            GameObject gameObject = Object.Instantiate(prefab, position, Quaternion.identity) as GameObject;
+            GameObject gameObject = Object.Instantiate(prefab, position, Quaternion.Euler(0, 180, 0)) as GameObject;
             if (gameObject == null)
                 throw new Exception("Error instantiating card prefab");
             gameObject.transform.localScale *= scale;

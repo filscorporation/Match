@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Assets.Scripts.Match
 {
@@ -16,6 +17,9 @@ namespace Assets.Scripts.Match
         private CardState state = CardState.Unactive;
 
         private const float rotationSpeed = 0.05F;
+
+        private const float rotationDelay = 1F;
+        private float rotationDelayTimer = 0F;
 
         public CardState State
         {
@@ -40,12 +44,14 @@ namespace Assets.Scripts.Match
 
         protected void Reveal()
         {
-
+            Debug.Log($"Reveal card {Index}");
+            rotationDelayTimer = 0F;
         }
 
         protected void Hide()
         {
-
+            Debug.Log($"Hide card {Index}");
+            rotationDelayTimer = rotationDelay;
         }
 
         public void Update()
@@ -55,7 +61,16 @@ namespace Assets.Scripts.Match
 
         private void RotateToState()
         {
-            Quaternion target = State == CardState.Unactive ? Quaternion.Euler(0, 180, 0) : Quaternion.Euler(0, 0, 0);
+            Quaternion target;
+            if (State != CardState.Unactive || Math.Abs(rotationDelayTimer) > Mathf.Epsilon)
+            {
+                target = Quaternion.Euler(0, 0, 0);
+                rotationDelayTimer = Math.Max(0F, rotationDelayTimer - Time.deltaTime);
+            }
+            else
+            {
+                target = Quaternion.Euler(0, 180, 0);
+            }
             transform.rotation = Quaternion.Slerp(transform.rotation, target, rotationSpeed);
         }
     }
