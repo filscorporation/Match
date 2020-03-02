@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Image = UnityEngine.UIElements.Image;
 
 namespace Assets.Scripts.Match
 {
@@ -51,7 +52,8 @@ namespace Assets.Scripts.Match
             }
 
             CanvasRenderer[] elements = Resources.FindObjectsOfTypeAll<CanvasRenderer>();
-            blur = elements.FirstOrDefault(o => o.name == blurImageName)?.gameObject;
+            blur = elements.First(o => o.name == blurImageName).gameObject;
+            blur.GetComponent<UnityEngine.UI.Image>().rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
             activePlayerFrame = elements.FirstOrDefault(o => o.name == activePlayerFrameName)?.gameObject;
         }
 
