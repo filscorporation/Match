@@ -9,15 +9,18 @@ namespace Assets.Scripts.Match
     public class UIManager : MonoBehaviour
     {
         public GameManager GameManager;
-
+        
         private const string menuButton = "MenuButton";
         private const string backButton = "BackButton";
         private const string toMainMenuButton = "ToMainMenuButton";
         private const string playButton = "PlayButton";
 
+        private const string blurImageName = "Blur";
+
         private const string mainMenuSceneName = "MainMenuScene";
         private const string gameSceneName = "GameScene";
 
+        private GameObject blur;
         private bool uiMode = false;
 
         private readonly Dictionary<string, GameObject> buttons = new Dictionary<string, GameObject>
@@ -43,6 +46,8 @@ namespace Assets.Scripts.Match
             {
                 buttons[button] = objects.FirstOrDefault(o => o.name == button);
             }
+
+            blur = Resources.FindObjectsOfTypeAll<CanvasRenderer>().FirstOrDefault(o => o.name == blurImageName)?.gameObject;
         }
 
         private void Disable(string button)
@@ -55,9 +60,21 @@ namespace Assets.Scripts.Match
             buttons[button].SetActive(true);
         }
 
-        public void MenuButtonClick()
+        private void ToUIMode()
         {
             uiMode = true;
+            blur.SetActive(true);
+        }
+
+        private void FromUIMode()
+        {
+            uiMode = false;
+            blur.SetActive(false);
+        }
+
+        public void MenuButtonClick()
+        {
+            ToUIMode();
             Disable(menuButton);
             Enable(backButton);
             Enable(toMainMenuButton);
@@ -65,7 +82,7 @@ namespace Assets.Scripts.Match
 
         public void BackButtonClick()
         {
-            uiMode = false;
+            FromUIMode();
             Disable(backButton);
             Disable(toMainMenuButton);
             Enable(menuButton);
