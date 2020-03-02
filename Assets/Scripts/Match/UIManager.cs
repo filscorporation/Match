@@ -16,12 +16,15 @@ namespace Assets.Scripts.Match
         private const string playButton = "PlayButton";
 
         private const string blurImageName = "Blur";
+        private const string activePlayerFrameName = "ActivePlayerFrame";
 
         private const string mainMenuSceneName = "MainMenuScene";
         private const string gameSceneName = "GameScene";
 
         private GameObject blur;
         private bool uiMode = false;
+        private GameObject activePlayerFrame;
+        private Dictionary<string, Text> playersTexts;
 
         private readonly Dictionary<string, GameObject> buttons = new Dictionary<string, GameObject>
         {
@@ -47,7 +50,43 @@ namespace Assets.Scripts.Match
                 buttons[button] = objects.FirstOrDefault(o => o.name == button);
             }
 
-            blur = Resources.FindObjectsOfTypeAll<CanvasRenderer>().FirstOrDefault(o => o.name == blurImageName)?.gameObject;
+            CanvasRenderer[] elements = Resources.FindObjectsOfTypeAll<CanvasRenderer>();
+            blur = elements.FirstOrDefault(o => o.name == blurImageName)?.gameObject;
+            activePlayerFrame = elements.FirstOrDefault(o => o.name == activePlayerFrameName)?.gameObject;
+        }
+
+        public void DrawPlayers(List<Player> players, int active)
+        {
+            if (playersTexts == null)
+            {
+                playersTexts = new Dictionary<string, Text>();
+                int i = 0;
+                foreach (Player player in players)
+                {
+                    GameObject playerText = new GameObject(player.Name + " Text");
+                    playerText.AddComponent<CanvasRenderer>();
+                    Text text = playerText.AddComponent<Text>();
+                    text.transform.SetParent(transform);
+                    text.resizeTextForBestFit = true;
+                    text.resizeTextMaxSize = 260;
+                    text.font = Resources.FindObjectsOfTypeAll<Font>().FirstOrDefault();
+                    text.color = Color.black;
+                    text.rectTransform.anchorMin = new Vector2(0, 1);
+                    text.rectTransform.anchorMax = new Vector2(0, 1);
+                    text.rectTransform.pivot = new Vector2(0.5F, 0.5F);
+                    text.rectTransform.sizeDelta = new Vector2(600, 120);
+                    text.rectTransform.anchoredPosition = new Vector2(360, -100 - 120*i);
+                    playersTexts.Add(player.Name, text);
+                    i++;
+                }
+            }
+
+            foreach (Player player in players)
+            {
+                playersTexts[player.Name].text = player.Name + ": " + player.Score;
+            }
+            activePlayerFrame.transform.SetParent(playersTexts[players[active].Name].transform);
+            activePlayerFrame.transform.localPosition = Vector3.zero;
         }
 
         private void Disable(string button)
@@ -99,7 +138,7 @@ namespace Assets.Scripts.Match
             // TODO: fill GameSettings
             GameSettings.FieldWidth = 6;
             GameSettings.FieldHeigth = 5;
-            GameSettings.PlayersCount = 1;
+            GameSettings.PlayersCount = 2;
             SceneManager.LoadScene(gameSceneName);
         }
     }

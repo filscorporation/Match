@@ -125,13 +125,14 @@ namespace Assets.Scripts.Match
 
         private void Match(Card a, Card b)
         {
-            gameManager.Score(); // TODO: passing player
+            gameManager.Match();
             a.State = CardState.Revealed;
             b.State = CardState.Revealed;
         }
 
         private void Unmatch(Card a, Card b)
         {
+            gameManager.Unmatch();
             a.State = CardState.Unactive;
             b.State = CardState.Unactive;
         }

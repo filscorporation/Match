@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,6 +12,7 @@ namespace Assets.Scripts.Match
         public IInputManager InputManager;
 
         private List<Player> players;
+        private int activePlayer = 0;
 
         private const string defaultCardPackage = "DefaultPack";
 
@@ -25,6 +27,8 @@ namespace Assets.Scripts.Match
         {
             if (IsGetInput())
                 InputManager.CheckForInput();
+
+            UIManager.DrawPlayers(players, activePlayer);
         }
 
         private bool IsGetInput()
@@ -34,7 +38,7 @@ namespace Assets.Scripts.Match
 
         public void StartGame()
         {
-            players = new List<Player>(GameSettings.PlayersCount);
+            InitializePlayers(GameSettings.PlayersCount);
 
             CardManager = new CardManager(this);
             FieldParams fieldParams = new FieldParams { Height = GameSettings.FieldHeigth, Width = GameSettings.FieldWidth };
@@ -45,9 +49,23 @@ namespace Assets.Scripts.Match
             UIManager.GameManager = this;
         }
 
-        public void Score()
+        private void InitializePlayers(int count)
         {
+            if (count != 2)
+                throw new NotImplementedException();
 
+            activePlayer = 0;
+            players = new List<Player> { new Player {Name = "Player 1"}, new Player {Name = "Player 2"} };
+        }
+
+        public void Match()
+        {
+            players[activePlayer].Score++;
+        }
+
+        public void Unmatch()
+        {
+            activePlayer = activePlayer + 1 > players.Count - 1 ? 0 : activePlayer + 1;
         }
 
         public void EndGame()
