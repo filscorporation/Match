@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.Match
 {
-    public interface IUISubscriber
+    public interface IInputSubscriber
     {
         void Handle(GameObject gameObject);
     }

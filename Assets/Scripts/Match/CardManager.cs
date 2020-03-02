@@ -7,7 +7,7 @@ using Object = UnityEngine.Object;
 
 namespace Assets.Scripts.Match
 {
-    public class CardManager : IUISubscriber
+    public class CardManager : IInputSubscriber
     {
         private GameManager gameManager;
 

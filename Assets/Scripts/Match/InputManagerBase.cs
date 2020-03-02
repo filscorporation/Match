@@ -9,9 +9,9 @@ namespace Assets.Scripts.Match
 {
     public abstract class InputManagerBase : IInputManager
     {
-        private List<IUISubscriber> subscribers = new List<IUISubscriber>();
+        private List<IInputSubscriber> subscribers = new List<IInputSubscriber>();
 
-        public void AddSubscriber(IUISubscriber subscriber)
+        public void AddSubscriber(IInputSubscriber subscriber)
         {
             subscribers.Add(subscriber);
         }
@@ -27,7 +27,7 @@ namespace Assets.Scripts.Match
             if (collider == null)
                 return false;
 
-            foreach (IUISubscriber subscriber in subscribers)
+            foreach (IInputSubscriber subscriber in subscribers)
             {
                 subscriber.Handle(collider.gameObject);
             }

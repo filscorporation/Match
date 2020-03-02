@@ -2,6 +2,6 @@
 {
     public class Player
     {
-
+        public int Score = 0;
     }
 }

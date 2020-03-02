@@ -8,7 +8,7 @@ namespace Assets.Scripts.Match
 {
     public interface IInputManager
     {
-        void AddSubscriber(IUISubscriber subscriber);
+        void AddSubscriber(IInputSubscriber subscriber);
 
         void CheckForInput();
     }
