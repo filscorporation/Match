@@ -46,7 +46,6 @@ namespace Assets.Scripts.Match
             InputManager = new PCInputManager();
             InputManager.AddSubscriber(CardManager);
             UIManager = FindObjectOfType<UIManager>();
-            UIManager.GameManager = this;
         }
 
         private void InitializePlayers(int count)
@@ -70,7 +69,7 @@ namespace Assets.Scripts.Match
 
         public void EndGame()
         {
-            
+            UIManager.OpenRestartMenu(1.5F);
         }
     }
 }

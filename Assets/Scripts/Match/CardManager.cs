@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Assets.Scripts.Match.Exceptions;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -128,6 +129,8 @@ namespace Assets.Scripts.Match
             gameManager.Match();
             a.State = CardState.Revealed;
             b.State = CardState.Revealed;
+
+            CheckForGameEnd();
         }
 
         private void Unmatch(Card a, Card b)
@@ -135,6 +138,14 @@ namespace Assets.Scripts.Match
             gameManager.Unmatch();
             a.State = CardState.Unactive;
             b.State = CardState.Unactive;
+        }
+
+        private void CheckForGameEnd()
+        {
+            if (cards.All(cs => cs.All(c => c.State == CardState.Revealed)))
+            {
+                gameManager.EndGame();
+            }
         }
 
         private List<Object> GetCardPrefabs(string packagePath)
@@ -157,8 +168,6 @@ namespace Assets.Scripts.Match
                 sr = back.AddComponent<SpriteRenderer>();
                 sr.sprite = cardbackSprite;
 
-                if (prefab == null)
-                    throw new Exception("Error creating card prefab");
                 prefabs.Add(prefab);
             }
 

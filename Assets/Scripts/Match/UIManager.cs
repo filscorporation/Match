@@ -3,18 +3,16 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Image = UnityEngine.UIElements.Image;
 
 namespace Assets.Scripts.Match
 {
     public class UIManager : MonoBehaviour
     {
-        public GameManager GameManager;
-        
         private const string menuButton = "MenuButton";
         private const string backButton = "BackButton";
         private const string toMainMenuButton = "ToMainMenuButton";
         private const string playButton = "PlayButton";
+        private const string restartButton = "RestartButton";
 
         private const string blurImageName = "Blur";
         private const string activePlayerFrameName = "ActivePlayerFrame";
@@ -33,6 +31,7 @@ namespace Assets.Scripts.Match
             { backButton, null },
             { toMainMenuButton, null },
             { playButton, null },
+            { restartButton, null },
         };
 
         public void Start()
@@ -53,7 +52,7 @@ namespace Assets.Scripts.Match
 
             CanvasRenderer[] elements = Resources.FindObjectsOfTypeAll<CanvasRenderer>();
             blur = elements.First(o => o.name == blurImageName).gameObject;
-            blur.GetComponent<UnityEngine.UI.Image>().rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
+            blur.GetComponent<Image>().rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
             activePlayerFrame = elements.FirstOrDefault(o => o.name == activePlayerFrameName)?.gameObject;
         }
 
@@ -87,8 +86,32 @@ namespace Assets.Scripts.Match
             {
                 playersTexts[player.Name].text = player.Name + ": " + player.Score;
             }
-            activePlayerFrame.transform.SetParent(playersTexts[players[active].Name].transform);
-            activePlayerFrame.transform.localPosition = Vector3.zero;
+
+            if (players.Count == 1)
+            {
+                activePlayerFrame.SetActive(false);
+            }
+            else
+            {
+                activePlayerFrame.SetActive(true);
+                activePlayerFrame.transform.SetParent(playersTexts[players[active].Name].transform);
+                activePlayerFrame.transform.localPosition = Vector3.zero;
+            }
+        }
+
+        public void OpenRestartMenu(float delay)
+        {
+            Disable(menuButton);
+            Invoke(nameof(OpenRestartMenu), delay);
+        }
+
+        public void OpenRestartMenu()
+        {
+            ToUIMode();
+            Disable(menuButton);
+            Disable(backButton);
+            Enable(toMainMenuButton);
+            Enable(restartButton);
         }
 
         private void Disable(string button)
@@ -131,7 +154,6 @@ namespace Assets.Scripts.Match
 
         public void ToMainMenuButtonClick()
         {
-            GameManager.EndGame();
             SceneManager.LoadScene(mainMenuSceneName);
         }
 
@@ -141,6 +163,11 @@ namespace Assets.Scripts.Match
             GameSettings.FieldWidth = 6;
             GameSettings.FieldHeigth = 5;
             GameSettings.PlayersCount = 2;
+            SceneManager.LoadScene(gameSceneName);
+        }
+
+        public void RestartButtonClick()
+        {
             SceneManager.LoadScene(gameSceneName);
         }
     }
