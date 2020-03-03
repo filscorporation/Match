@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Assets.Scripts.Match.Exceptions;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -20,8 +22,11 @@ namespace Assets.Scripts.Match
         private const string cardPacksFolder = "CardPacks";
         private const string cardsFolder = "Cards";
         private const string cardbackFileName = "CardBack";
-        private const float portraitScaleFactor = 0.6F;
-        private const float landscapeScaleFactor = 1F;
+        private const float portraitScaleFactor = 0.7F;
+        private const float landscapeScaleFactor = 1.1F;
+
+        private bool isAnimating = false;
+        private const float cardAnimationLength = 1F;
 
         public CardManager(GameManager gameManager)
         {
@@ -34,7 +39,7 @@ namespace Assets.Scripts.Match
 
             ClearField();
             cards = new Card[prs.Height][];
-            List<Object> cardPrefabs = GetCardPrefabs(cardPack);
+            List<Object> cardPrefabs = GetCardPrefabs(cardPack, out Vector2 cardSize);
             if (cardPrefabs.Count < prs.Width * prs.Height / 2)
                 throw new Exception("Not enougth images for field size");
 
@@ -49,13 +54,14 @@ namespace Assets.Scripts.Match
             fieldParent.gameObject.name = "Field";
 
             float cardScale = GetCardScale(prs.Width, prs.Height, Screen.width, Screen.height);
+            cardSize = new Vector2(cardSize.x * cardScale, cardSize.y * cardScale);
 
             for (int j = 0; j < prs.Height; j++)
             {
                 cards[j] = new Card[prs.Width];
                 for (int i = 0; i < prs.Width; i++)
                 {
-                    Vector2 position = GetCardPosition(prs.Width, prs.Height, Screen.width, Screen.height, i, j);
+                    Vector2 position = GetCardPosition(prs.Width, prs.Height, Screen.width, Screen.height, i, j, cardSize);
                     int index = seed[j * prs.Width + i] / 2;
                     Card card = CreateCard(cardPrefabs[index], position, cardScale, index);
                     cards[j][i] = card;
@@ -90,6 +96,8 @@ namespace Assets.Scripts.Match
             }
         }
 
+        public bool IsAnimating() => isAnimating;
+
         public void Handle(GameObject gameObject)
         {
             if (gameObject.TryGetComponent<Card>(out Card card))
@@ -109,6 +117,13 @@ namespace Assets.Scripts.Match
                 }
                 else
                 {
+                    isAnimating = true;
+                    Task.Run(() =>
+                    {
+                        Thread.Sleep((int)(cardAnimationLength * 1000));
+                        isAnimating = false;
+                    });
+
                     if (lastActive.Index == card.Index)
                     {
                         Debug.Log($"Match");
@@ -148,12 +163,14 @@ namespace Assets.Scripts.Match
             }
         }
 
-        private List<Object> GetCardPrefabs(string packagePath)
+        private List<Object> GetCardPrefabs(string packagePath, out Vector2 cardSize)
         {
             Sprite[] sprites = Resources.LoadAll<Sprite>(Path.Combine(cardPacksFolder, packagePath, cardsFolder));
             Sprite cardbackSprite = Resources.Load<Sprite>(Path.Combine(cardPacksFolder, packagePath, cardbackFileName));
             if (sprites == null || sprites.Length == 0)
                 throw new ResourceLoadException("Error loading card prefab");
+
+            cardSize = sprites.First().rect.size / sprites.First().pixelsPerUnit;
 
             List<Object> prefabs = new List<Object>();
             foreach (Sprite sprite in sprites)
@@ -174,11 +191,17 @@ namespace Assets.Scripts.Match
             return prefabs;
         }
 
-        private Vector2 GetCardPosition(int widthAmount, int heigthAmount, float screenWidth, float screenHeigth, int i, int j)
+        private Vector2 GetCardPosition(int widthAmount, int heigthAmount, float screenWidth, float screenHeigth, int i, int j, Vector2 cardSize)
         {
-            float x = screenWidth / (widthAmount + 1) * (i + 1);
-            float y = screenHeigth / (heigthAmount + 1) * (j + 1);
-            return Camera.main.ScreenToWorldPoint(new Vector3(x, y));
+            // Even placement strategy
+            //float x = screenWidth / (widthAmount + 1) * (i + 1);
+            //float y = screenHeigth / (heigthAmount + 1) * (j + 1);
+
+            // Dense
+            float gapIndex = 1.05F;
+            float x = (i - (float)widthAmount / 2 + 0.5F) * cardSize.x * gapIndex;
+            float y = (j - (float)heigthAmount / 2 + 0.5F) * cardSize.y * gapIndex;
+            return new Vector3(x, y);
         }
 
         private float GetCardScale(int widthAmount, int heigthAmount, float screenWidth, float screenHeigth)

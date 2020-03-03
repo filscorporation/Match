@@ -15,6 +15,7 @@ namespace Assets.Scripts.Match
         private int activePlayer = 0;
 
         private const string defaultCardPackage = "DefaultPack";
+        private const bool isFreezeOnAnimation = true;
 
         private bool getInput = true;
 
@@ -33,7 +34,7 @@ namespace Assets.Scripts.Match
 
         private bool IsGetInput()
         {
-            return getInput && !UIManager.IsUIMode();
+            return getInput && !UIManager.IsUIMode() && (!isFreezeOnAnimation || !CardManager.IsAnimating());
         }
 
         public void StartGame()

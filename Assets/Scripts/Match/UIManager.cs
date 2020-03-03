@@ -51,8 +51,11 @@ namespace Assets.Scripts.Match
             }
 
             CanvasRenderer[] elements = Resources.FindObjectsOfTypeAll<CanvasRenderer>();
-            blur = elements.First(o => o.name == blurImageName).gameObject;
-            blur.GetComponent<Image>().rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
+            blur = elements.FirstOrDefault(o => o.name == blurImageName)?.gameObject;
+            if (blur != null)
+            {
+                blur.GetComponent<Image>().rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
+            }
             activePlayerFrame = elements.FirstOrDefault(o => o.name == activePlayerFrameName)?.gameObject;
         }
 

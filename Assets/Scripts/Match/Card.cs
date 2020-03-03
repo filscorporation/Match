@@ -16,15 +16,14 @@ namespace Assets.Scripts.Match
 
         private CardState state = CardState.Unactive;
 
-        private const float rotationSpeed = 0.05F;
-
+        private const float rotationSpeed = 0.1F;
         private const float rotationDelay = 1F;
         private float rotationDelayTimer = 0F;
 
         public CardState State
         {
-            get { return state; }
-            set { SetState(value); }
+            get => state;
+            set => SetState(value);
         }
 
         private void SetState(CardState state)
