@@ -19,10 +19,21 @@ namespace Assets.Scripts.Match.UI
         /// </summary>
         protected abstract Dictionary<string, GameObject> Buttons { get; set; }
 
+        public void Start()
+        {
+            WarmUpButtons();
+            WarmUp();
+        }
+
+        /// <summary>
+        /// Is called on start
+        /// </summary>
+        protected abstract void WarmUp();
+
         /// <summary>
         /// Searches for button according to Button dictionary
         /// </summary>
-        protected void WarmUpButtons()
+        private void WarmUpButtons()
         {
             List<string> buttonNames = Buttons.Keys.ToList();
             List<GameObject> objects = Resources.FindObjectsOfTypeAll<Button>().Select(b => b.gameObject).ToList();
@@ -48,6 +59,16 @@ namespace Assets.Scripts.Match.UI
         protected void Disable(string button)
         {
             Buttons[button].SetActive(false);
+        }
+
+        /// <summary>
+        /// Sets buttons interactable or not by name
+        /// </summary>
+        /// <param name="button"></param>
+        /// <param name="value">Is interactable</param>
+        protected void SetInteractable(string button, bool value)
+        {
+            Buttons[button].GetComponent<Button>().interactable = value;
         }
     }
 }

@@ -39,15 +39,8 @@ namespace Assets.Scripts.Match.UI
             { restartButton, null },
         };
 
-        public void Start()
+        protected override void WarmUp()
         {
-            WarmUp();
-        }
-
-        private void WarmUp()
-        {
-            WarmUpButtons();
-
             CanvasRenderer[] elements = Resources.FindObjectsOfTypeAll<CanvasRenderer>();
             blur = elements.FirstOrDefault(o => o.name == blurImageName)?.gameObject;
             if (blur != null)
