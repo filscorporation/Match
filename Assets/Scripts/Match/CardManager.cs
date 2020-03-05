@@ -22,8 +22,7 @@ namespace Assets.Scripts.Match
         private const string cardPacksFolder = "CardPacks";
         private const string cardsFolder = "Cards";
         private const string cardbackFileName = "CardBack";
-        private const float portraitScaleFactor = 0.7F;
-        private const float landscapeScaleFactor = 1.1F;
+        private const float portraitScaleFactor = 0.75F;
 
         private bool isAnimating = false;
         private const float cardAnimationLength = 1F;
@@ -214,10 +213,7 @@ namespace Assets.Scripts.Match
 
         private float GetCardScale(int widthAmount, int heigthAmount, float screenWidth, float screenHeigth)
         {
-            if (screenWidth > screenHeigth)
-                 return Math.Min(landscapeScaleFactor / widthAmount, landscapeScaleFactor / heigthAmount);
-            else
-                return Math.Min(portraitScaleFactor / widthAmount, portraitScaleFactor / heigthAmount);
+            return Math.Min(portraitScaleFactor / widthAmount, portraitScaleFactor / heigthAmount);
         }
 
         private Card CreateCard(Object prefab, Vector2 position, float scale, int index)
