@@ -7,5 +7,7 @@
         public static int FieldHeigth = 5;
 
         public static int PlayersCount = 2;
+
+        public static string CardPackageName = "DefaultPack";
     }
 }

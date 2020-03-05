@@ -37,40 +37,48 @@ namespace Assets.Scripts.Match
         {
             Debug.Log("Start initializing field");
 
-            ClearField();
-            cards = new Card[prs.Height][];
-            List<Object> cardPrefabs = GetCardPrefabs(cardPack, out Vector2 cardSize);
-            if (cardPrefabs.Count < prs.Width * prs.Height / 2)
-                throw new Exception("Not enougth images for field size");
-
-            List<int> seed = new List<int>(prs.Width * prs.Height);
-            for (int i = 0; i < prs.Width * prs.Height; i++)
+            List<Object> cardPrefabs = new List<Object>();
+            try
             {
-                seed.Add(i);
-            }
-            seed.Shuffle();
+                ClearField();
+                cards = new Card[prs.Height][];
+                cardPrefabs = GetCardPrefabs(cardPack, out Vector2 cardSize);
+                if (cardPrefabs.Count < prs.Width * prs.Height / 2)
+                    throw new Exception("Not enougth images for field size");
 
-            fieldParent = new GameObject().transform;
-            fieldParent.gameObject.name = "Field";
-
-            float cardScale = GetCardScale(prs.Width, prs.Height, Screen.width, Screen.height);
-            cardSize = new Vector2(cardSize.x * cardScale, cardSize.y * cardScale);
-
-            for (int j = 0; j < prs.Height; j++)
-            {
-                cards[j] = new Card[prs.Width];
-                for (int i = 0; i < prs.Width; i++)
+                List<int> seed = new List<int>(prs.Width * prs.Height);
+                for (int i = 0; i < prs.Width * prs.Height; i++)
                 {
-                    Vector2 position = GetCardPosition(prs.Width, prs.Height, Screen.width, Screen.height, i, j, cardSize);
-                    int index = seed[j * prs.Width + i] / 2;
-                    Card card = CreateCard(cardPrefabs[index], position, cardScale, index);
-                    cards[j][i] = card;
+                    seed.Add(i);
+                }
+
+                seed.Shuffle();
+
+                fieldParent = new GameObject().transform;
+                fieldParent.gameObject.name = "Field";
+
+                float cardScale = GetCardScale(prs.Width, prs.Height, Screen.width, Screen.height);
+                cardSize = new Vector2(cardSize.x * cardScale, cardSize.y * cardScale);
+
+                for (int j = 0; j < prs.Height; j++)
+                {
+                    cards[j] = new Card[prs.Width];
+                    for (int i = 0; i < prs.Width; i++)
+                    {
+                        Vector2 position = GetCardPosition(prs.Width, prs.Height, Screen.width, Screen.height, i, j,
+                            cardSize);
+                        int index = seed[j * prs.Width + i] / 2;
+                        Card card = CreateCard(cardPrefabs[index], position, cardScale, index);
+                        cards[j][i] = card;
+                    }
                 }
             }
-
-            foreach (Object cardPrefab in cardPrefabs)
+            finally
             {
-                Object.Destroy(cardPrefab);
+                foreach (Object cardPrefab in cardPrefabs)
+                {
+                    Object.Destroy(cardPrefab);
+                }
             }
 
             Debug.Log("Finish initializing field");

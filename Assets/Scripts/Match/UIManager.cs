@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,6 +20,10 @@ namespace Assets.Scripts.Match
 
         private const string mainMenuSceneName = "MainMenuScene";
         private const string gameSceneName = "GameScene";
+
+        private const string defaultCardPackage = "DefaultPack";
+        private const string geometryCardPackage = "GeometryPack";
+        private const string colorsCardPackage = "ColorsPack";
 
         private GameObject blur;
         private bool uiMode = false;
@@ -63,25 +68,15 @@ namespace Assets.Scripts.Match
         {
             if (playersTexts == null)
             {
+                if (players.Count > 2)
+                    throw new NotSupportedException("Too much players");
                 playersTexts = new Dictionary<string, Text>();
-                int i = 0;
+                Text[] elements = Resources.FindObjectsOfTypeAll<Text>();
                 foreach (Player player in players)
                 {
-                    GameObject playerText = new GameObject(player.Name + " Text");
-                    playerText.AddComponent<CanvasRenderer>();
-                    Text text = playerText.AddComponent<Text>();
-                    text.transform.SetParent(transform);
-                    text.resizeTextForBestFit = true;
-                    text.resizeTextMaxSize = 260;
-                    text.font = Resources.FindObjectsOfTypeAll<Font>().FirstOrDefault();
-                    text.color = Color.black;
-                    text.rectTransform.anchorMin = new Vector2(0, 1);
-                    text.rectTransform.anchorMax = new Vector2(0, 1);
-                    text.rectTransform.pivot = new Vector2(0.5F, 0.5F);
-                    text.rectTransform.sizeDelta = new Vector2(600, 120);
-                    text.rectTransform.anchoredPosition = new Vector2(360, -100 - 120*i);
+                    Text text = elements.First(t => t.gameObject.name == player.Name + " Text");
+                    text.gameObject.SetActive(true);
                     playersTexts.Add(player.Name, text);
-                    i++;
                 }
             }
 
@@ -163,9 +158,10 @@ namespace Assets.Scripts.Match
         public void PlayButtonClick()
         {
             // TODO: fill GameSettings
-            GameSettings.FieldWidth = 6;
-            GameSettings.FieldHeigth = 5;
-            GameSettings.PlayersCount = 2;
+            //GameSettings.FieldWidth = 6;
+            //GameSettings.FieldHeigth = 5;
+            //GameSettings.PlayersCount = 2;
+            GameSettings.CardPackageName = geometryCardPackage;
             SceneManager.LoadScene(gameSceneName);
         }
 

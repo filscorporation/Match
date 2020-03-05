@@ -14,7 +14,6 @@ namespace Assets.Scripts.Match
         private List<Player> players;
         private int activePlayer = 0;
 
-        private const string defaultCardPackage = "DefaultPack";
         private const bool isFreezeOnAnimation = true;
 
         private bool getInput = true;
@@ -43,7 +42,7 @@ namespace Assets.Scripts.Match
 
             CardManager = new CardManager(this);
             FieldParams fieldParams = new FieldParams { Height = GameSettings.FieldHeigth, Width = GameSettings.FieldWidth };
-            CardManager.InitializeField(fieldParams, defaultCardPackage);
+            CardManager.InitializeField(fieldParams, GameSettings.CardPackageName);
             InputManager = new PCInputManager();
             InputManager.AddSubscriber(CardManager);
             UIManager = FindObjectOfType<UIManager>();
@@ -51,11 +50,19 @@ namespace Assets.Scripts.Match
 
         private void InitializePlayers(int count)
         {
-            if (count != 2)
-                throw new NotImplementedException();
-
             activePlayer = 0;
-            players = new List<Player> { new Player {Name = "Player 1"}, new Player {Name = "Player 2"} };
+            switch (count)
+            {
+                case 1:
+                    players = new List<Player> { new Player { Name = "Player 1" } };
+                    break;
+                case 2:
+                    players = new List<Player> { new Player { Name = "Player 1" }, new Player { Name = "Player 2" } };
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
         }
 
         public void Match()
