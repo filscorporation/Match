@@ -5,55 +5,48 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace Assets.Scripts.Match
+namespace Assets.Scripts.Match.UI
 {
-    public class UIManager : MonoBehaviour
+    /// <summary>
+    /// UI manager used in game
+    /// </summary>
+    public class GameUIManager : UIManager
     {
         private const string menuButton = "MenuButton";
         private const string backButton = "BackButton";
         private const string toMainMenuButton = "ToMainMenuButton";
-        private const string playButton = "PlayButton";
         private const string restartButton = "RestartButton";
 
         private const string blurImageName = "Blur";
         private const string activePlayerFrameName = "ActivePlayerFrame";
-
-        private const string mainMenuSceneName = "MainMenuScene";
-        private const string gameSceneName = "GameScene";
-
-        private const string defaultCardPackage = "DefaultPack";
-        private const string geometryCardPackage = "GeometryPack";
-        private const string colorsCardPackage = "ColorsPack";
 
         private GameObject blur;
         private bool uiMode = false;
         private GameObject activePlayerFrame;
         private Dictionary<string, Text> playersTexts;
 
-        private readonly Dictionary<string, GameObject> buttons = new Dictionary<string, GameObject>
+        /// <summary>
+        /// Check if UI menu is opened
+        /// </summary>
+        /// <returns></returns>
+        public bool IsUIMode() => uiMode;
+
+        protected override Dictionary<string, GameObject> Buttons { get; set; } = new Dictionary<string, GameObject>
         {
             { menuButton, null },
             { backButton, null },
             { toMainMenuButton, null },
-            { playButton, null },
             { restartButton, null },
         };
 
         public void Start()
         {
-            WarmUpButtons();
+            WarmUp();
         }
 
-        public bool IsUIMode() => uiMode;
-
-        private void WarmUpButtons()
+        private void WarmUp()
         {
-            List<string> buttonNames = buttons.Keys.ToList();
-            List<GameObject> objects = Resources.FindObjectsOfTypeAll<Button>().Select(b => b.gameObject).ToList();
-            foreach (string button in buttonNames)
-            {
-                buttons[button] = objects.FirstOrDefault(o => o.name == button);
-            }
+            WarmUpButtons();
 
             CanvasRenderer[] elements = Resources.FindObjectsOfTypeAll<CanvasRenderer>();
             blur = elements.FirstOrDefault(o => o.name == blurImageName)?.gameObject;
@@ -64,6 +57,11 @@ namespace Assets.Scripts.Match
             activePlayerFrame = elements.FirstOrDefault(o => o.name == activePlayerFrameName)?.gameObject;
         }
 
+        /// <summary>
+        /// Draws all players icons and score
+        /// </summary>
+        /// <param name="players">Players list</param>
+        /// <param name="active">Index of active player (whos turn)</param>
         public void DrawPlayers(List<Player> players, int active)
         {
             if (playersTexts == null)
@@ -97,6 +95,18 @@ namespace Assets.Scripts.Match
             }
         }
 
+        private void ToUIMode()
+        {
+            uiMode = true;
+            blur.SetActive(true);
+        }
+
+        private void FromUIMode()
+        {
+            uiMode = false;
+            blur.SetActive(false);
+        }
+
         public void OpenRestartMenu(float delay)
         {
             Disable(menuButton);
@@ -112,36 +122,6 @@ namespace Assets.Scripts.Match
             Enable(restartButton);
         }
 
-        private void Disable(string button)
-        {
-            buttons[button].SetActive(false);
-        }
-
-        private void Enable(string button)
-        {
-            buttons[button].SetActive(true);
-        }
-
-        private void ToUIMode()
-        {
-            uiMode = true;
-            blur.SetActive(true);
-        }
-
-        private void FromUIMode()
-        {
-            uiMode = false;
-            blur.SetActive(false);
-        }
-
-        public void MenuButtonClick()
-        {
-            ToUIMode();
-            Disable(menuButton);
-            Enable(backButton);
-            Enable(toMainMenuButton);
-        }
-
         public void BackButtonClick()
         {
             FromUIMode();
@@ -155,14 +135,12 @@ namespace Assets.Scripts.Match
             SceneManager.LoadScene(mainMenuSceneName);
         }
 
-        public void PlayButtonClick()
+        public void MenuButtonClick()
         {
-            // TODO: fill GameSettings
-            //GameSettings.FieldWidth = 6;
-            //GameSettings.FieldHeigth = 5;
-            //GameSettings.PlayersCount = 2;
-            GameSettings.CardPackageName = geometryCardPackage;
-            SceneManager.LoadScene(gameSceneName);
+            ToUIMode();
+            Disable(menuButton);
+            Enable(backButton);
+            Enable(toMainMenuButton);
         }
 
         public void RestartButtonClick()

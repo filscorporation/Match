@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using Assets.Scripts.Match.UI;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts.Match
 {
     public class GameManager : MonoBehaviour
     {
         public CardManager CardManager;
-        public UIManager UIManager;
+        public GameUIManager UIManager;
         public IInputManager InputManager;
 
         private List<Player> players;
@@ -18,6 +18,8 @@ namespace Assets.Scripts.Match
 
         private bool getInput = true;
 
+        private bool isInitialized = false;
+
         public void Start()
         {
             StartGame();
@@ -25,6 +27,9 @@ namespace Assets.Scripts.Match
 
         public void Update()
         {
+            if (!isInitialized)
+                return;
+
             if (IsGetInput())
                 InputManager.CheckForInput();
 
@@ -45,7 +50,9 @@ namespace Assets.Scripts.Match
             CardManager.InitializeField(fieldParams, GameSettings.CardPackageName);
             InputManager = new PCInputManager();
             InputManager.AddSubscriber(CardManager);
-            UIManager = FindObjectOfType<UIManager>();
+            UIManager = FindObjectOfType<GameUIManager>();
+
+            isInitialized = true;
         }
 
         private void InitializePlayers(int count)
