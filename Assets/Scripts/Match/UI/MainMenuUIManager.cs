@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.Match.UI
 {
@@ -12,20 +13,27 @@ namespace Assets.Scripts.Match.UI
     {
         private const string playButton = "PlayButton";
         private const string singlePlayerButton = "SinglePlayerButton";
-        private const string multiPlayerButton = "MultiPlayerButton";
+        private const string twoPlayerButton = "TwoPlayerButton";
+        private const string threePlayerButton = "ThreePlayerButton";
+        private const string fourPlayerButton = "FourPlayerButton";
         private const string defaultCardPackButton = "DefaultCardPackButton";
         private const string colorsCardPackButton = "ColorsCardPackButton";
         private const string geometryCardPackButton = "GeometryCardPackButton";
 
-        private const string defaultCardPackage = "DefaultPack";
-        private const string geometryCardPackage = "GeometryPack";
-        private const string colorsCardPackage = "ColorsPack";
+        private CardPack defaultCardPackage = new CardPack("DefaultPack", 6, 5);
+        private CardPack geometryCardPackage = new CardPack("GeometryPack", 5, 4);
+        private CardPack colorsCardPackage = new CardPack("ColorsPack", 6, 5);
 
-        protected override Dictionary<string, GameObject> Buttons { get; set; } = new Dictionary<string, GameObject>
+        private OptionsButtonsManager<CardPack> cardPacksButtons;
+        private OptionsButtonsManager<int> playersCountButtons;
+
+        protected override Dictionary<string, Button> Buttons { get; set; } = new Dictionary<string, Button>
         {
             { playButton, null },
             { singlePlayerButton, null },
-            { multiPlayerButton, null },
+            { twoPlayerButton, null },
+            { threePlayerButton, null },
+            { fourPlayerButton, null },
             { defaultCardPackButton, null },
             { colorsCardPackButton, null },
             { geometryCardPackButton, null },
@@ -33,96 +41,79 @@ namespace Assets.Scripts.Match.UI
 
         protected override void WarmUp()
         {
-            switch (GameSettings.PlayersCount)
-            {
-                case 1:
-                    SetInteractable(singlePlayerButton, false);
-                    SetInteractable(multiPlayerButton, true);
-                    break;
-                case 2:
-                    SetInteractable(singlePlayerButton, true);
-                    SetInteractable(multiPlayerButton, false);
-                    break;
-                default:
-                    throw new NotSupportedException("Too much players");
-            }
+            SetDefaultCardPackage();
 
-            switch (GameSettings.CardPackageName)
-            {
-                case defaultCardPackage:
-                    SetInteractable(defaultCardPackButton, false);
-                    SetInteractable(colorsCardPackButton, true);
-                    SetInteractable(geometryCardPackButton, true);
-                    GameSettings.FieldHeigth = 5;
-                    GameSettings.FieldWidth = 6;
-                    break;
-                case colorsCardPackage:
-                    SetInteractable(defaultCardPackButton, true);
-                    SetInteractable(colorsCardPackButton, false);
-                    SetInteractable(geometryCardPackButton, true);
-                    GameSettings.FieldHeigth = 5;
-                    GameSettings.FieldWidth = 6;
-                    break;
-                case geometryCardPackage:
-                    SetInteractable(defaultCardPackButton, true);
-                    SetInteractable(colorsCardPackButton, true);
-                    SetInteractable(geometryCardPackButton, false);
-                    GameSettings.FieldHeigth = 4;
-                    GameSettings.FieldWidth = 5;
-                    break;
-                default:
-                    throw new NotSupportedException($"Unknown card package name: {GameSettings.CardPackageName}");
-            }
+            List<ButtonWrapper<int>> pcbs = new List<ButtonWrapper<int>>();
+            pcbs.Add(new ButtonWrapper<int>(Buttons[singlePlayerButton], 1));
+            pcbs.Add(new ButtonWrapper<int>(Buttons[twoPlayerButton], 2));
+            pcbs.Add(new ButtonWrapper<int>(Buttons[threePlayerButton], 3));
+            pcbs.Add(new ButtonWrapper<int>(Buttons[fourPlayerButton], 4));
+            playersCountButtons = new OptionsButtonsManager<int>(pcbs, GameSettings.PlayersCount);
+
+            List<ButtonWrapper<CardPack>> cpbs = new List<ButtonWrapper<CardPack>>();
+            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[defaultCardPackButton], defaultCardPackage));
+            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[colorsCardPackButton], colorsCardPackage));
+            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[geometryCardPackButton], geometryCardPackage));
+            cardPacksButtons = new OptionsButtonsManager<CardPack>(cpbs, GameSettings.CardPackage);
+        }
+
+        private void SetDefaultCardPackage()
+        {
+            if (GameSettings.CardPackage == null)
+                GameSettings.CardPackage = defaultCardPackage;
         }
 
         public void PlayButtonClick()
         {
-
             SceneManager.LoadScene(gameSceneName);
         }
 
         public void SinglePlayerButtonClick()
         {
-            SetInteractable(singlePlayerButton, false);
-            SetInteractable(multiPlayerButton, true);
             GameSettings.PlayersCount = 1;
+            playersCountButtons.SelectOption(GameSettings.PlayersCount);
         }
 
-        public void MultiPlayerButtonClick()
+        public void TwoPlayerButtonClick()
         {
-            SetInteractable(singlePlayerButton, true);
-            SetInteractable(multiPlayerButton, false);
             GameSettings.PlayersCount = 2;
+            playersCountButtons.SelectOption(GameSettings.PlayersCount);
+        }
+
+        public void ThreePlayerButtonClick()
+        {
+            GameSettings.PlayersCount = 3;
+            playersCountButtons.SelectOption(GameSettings.PlayersCount);
+        }
+
+        public void FourPlayerButtonClick()
+        {
+            GameSettings.PlayersCount = 4;
+            playersCountButtons.SelectOption(GameSettings.PlayersCount);
         }
 
         public void DefaultCardPackButtonClick()
         {
-            SetInteractable(defaultCardPackButton, false);
-            SetInteractable(colorsCardPackButton, true);
-            SetInteractable(geometryCardPackButton, true);
-            GameSettings.FieldHeigth = 5;
-            GameSettings.FieldWidth = 6;
-            GameSettings.CardPackageName = defaultCardPackage;
+            GameSettings.CardPackage = defaultCardPackage;
+            GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
+            GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
+            cardPacksButtons.SelectOption(GameSettings.CardPackage);
         }
 
         public void ColorsCardPackButtonClick()
         {
-            SetInteractable(defaultCardPackButton, true);
-            SetInteractable(colorsCardPackButton, false);
-            SetInteractable(geometryCardPackButton, true);
-            GameSettings.FieldHeigth = 5;
-            GameSettings.FieldWidth = 6;
-            GameSettings.CardPackageName = colorsCardPackage;
+            GameSettings.CardPackage = colorsCardPackage;
+            GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
+            GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
+            cardPacksButtons.SelectOption(GameSettings.CardPackage);
         }
 
         public void GeometryCardPackButtonClick()
         {
-            SetInteractable(defaultCardPackButton, true);
-            SetInteractable(colorsCardPackButton, true);
-            SetInteractable(geometryCardPackButton, false);
-            GameSettings.FieldHeigth = 4;
-            GameSettings.FieldWidth = 5;
-            GameSettings.CardPackageName = geometryCardPackage;
+            GameSettings.CardPackage = geometryCardPackage;
+            GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
+            GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
+            cardPacksButtons.SelectOption(GameSettings.CardPackage);
         }
     }
 }

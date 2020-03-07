@@ -17,7 +17,7 @@ namespace Assets.Scripts.Match.UI
         /// List of all buttons in control of this manager
         /// Child class should overload it with button names for warm up
         /// </summary>
-        protected abstract Dictionary<string, GameObject> Buttons { get; set; }
+        protected abstract Dictionary<string, Button> Buttons { get; set; }
 
         public void Start()
         {
@@ -39,7 +39,7 @@ namespace Assets.Scripts.Match.UI
             List<GameObject> objects = Resources.FindObjectsOfTypeAll<Button>().Select(b => b.gameObject).ToList();
             foreach (string button in buttonNames)
             {
-                Buttons[button] = objects.FirstOrDefault(o => o.name == button);
+                Buttons[button] = objects.FirstOrDefault(o => o.name == button).GetComponent<Button>();
             }
         }
 
@@ -49,7 +49,7 @@ namespace Assets.Scripts.Match.UI
         /// <param name="button"></param>
         protected void Enable(string button)
         {
-            Buttons[button].SetActive(true);
+            Buttons[button].gameObject.SetActive(true);
         }
 
         /// <summary>
@@ -58,17 +58,7 @@ namespace Assets.Scripts.Match.UI
         /// <param name="button"></param>
         protected void Disable(string button)
         {
-            Buttons[button].SetActive(false);
-        }
-
-        /// <summary>
-        /// Sets buttons interactable or not by name
-        /// </summary>
-        /// <param name="button"></param>
-        /// <param name="value">Is interactable</param>
-        protected void SetInteractable(string button, bool value)
-        {
-            Buttons[button].GetComponent<Button>().interactable = value;
+            Buttons[button].gameObject.SetActive(false);
         }
     }
 }

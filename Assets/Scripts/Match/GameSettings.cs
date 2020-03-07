@@ -1,5 +1,8 @@
-﻿namespace Assets.Scripts.Match
+﻿using System;
+
+namespace Assets.Scripts.Match
 {
+    [Serializable]
     public static class GameSettings
     {
         public static int FieldWidth = 6;
@@ -8,6 +11,6 @@
 
         public static int PlayersCount = 2;
 
-        public static string CardPackageName = "DefaultPack";
+        public static CardPack CardPackage;
     }
 }

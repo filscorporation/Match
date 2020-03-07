@@ -32,7 +32,7 @@ namespace Assets.Scripts.Match
             this.gameManager = gameManager;
         }
 
-        public void InitializeField(FieldParams prs, string cardPack)
+        public void InitializeField(FieldParams prs, CardPack cardPack)
         {
             Debug.Log("Start initializing field");
 
@@ -41,7 +41,7 @@ namespace Assets.Scripts.Match
             {
                 ClearField();
                 cards = new Card[prs.Height][];
-                cardPrefabs = GetCardPrefabs(cardPack, out Vector2 cardSize);
+                cardPrefabs = GetCardPrefabs(cardPack.Name, out Vector2 cardSize);
                 if (cardPrefabs.Count < prs.Width * prs.Height / 2)
                     throw new Exception("Not enougth images for field size");
 

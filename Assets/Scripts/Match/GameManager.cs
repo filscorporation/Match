@@ -47,7 +47,7 @@ namespace Assets.Scripts.Match
 
             CardManager = new CardManager(this);
             FieldParams fieldParams = new FieldParams { Height = GameSettings.FieldHeigth, Width = GameSettings.FieldWidth };
-            CardManager.InitializeField(fieldParams, GameSettings.CardPackageName);
+            CardManager.InitializeField(fieldParams, GameSettings.CardPackage);
             InputManager = new PCInputManager();
             InputManager.AddSubscriber(CardManager);
             UIManager = FindObjectOfType<GameUIManager>();
@@ -69,7 +69,6 @@ namespace Assets.Scripts.Match
                 default:
                     throw new NotImplementedException();
             }
-
         }
 
         public void Match()

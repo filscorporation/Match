@@ -31,7 +31,7 @@ namespace Assets.Scripts.Match.UI
         /// <returns></returns>
         public bool IsUIMode() => uiMode;
 
-        protected override Dictionary<string, GameObject> Buttons { get; set; } = new Dictionary<string, GameObject>
+        protected override Dictionary<string, Button> Buttons { get; set; } = new Dictionary<string, Button>
         {
             { menuButton, null },
             { backButton, null },
