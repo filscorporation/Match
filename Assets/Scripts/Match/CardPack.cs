@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Match
 {
@@ -27,6 +28,15 @@ namespace Assets.Scripts.Match
                 return cardPack.Name == Name;
 
             return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -312013121;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
+            hashCode = hashCode * -1521134295 + MaxWidth.GetHashCode();
+            hashCode = hashCode * -1521134295 + MaxHeigth.GetHashCode();
+            return hashCode;
         }
     }
 }

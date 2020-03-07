@@ -36,6 +36,9 @@ namespace Assets.Scripts.Match
         {
             Debug.Log("Start initializing field");
 
+            if (cardPack == null)
+                throw new ArgumentNullException(nameof(cardPack));
+
             List<Object> cardPrefabs = new List<Object>();
             try
             {

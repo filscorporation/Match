@@ -59,7 +59,7 @@ namespace Assets.Scripts.Match.UI
         {
             if (playersTexts == null)
             {
-                if (players.Count > 2)
+                if (players.Count > 4)
                     throw new NotSupportedException("Too much players");
                 playersTexts = new Dictionary<string, Text>();
                 Text[] elements = Resources.FindObjectsOfTypeAll<Text>();

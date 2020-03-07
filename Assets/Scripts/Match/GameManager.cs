@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Match.UI;
 using UnityEngine;
 
@@ -13,6 +14,10 @@ namespace Assets.Scripts.Match
 
         private List<Player> players;
         private int activePlayer = 0;
+        private List<string> defaultPlayersNames = new List<string> //TODO: remove
+        {
+            "Player 1", "Player 2", "Player 3", "Player 4"
+        };
 
         private const bool isFreezeOnAnimation = true;
 
@@ -58,17 +63,9 @@ namespace Assets.Scripts.Match
         private void InitializePlayers(int count)
         {
             activePlayer = 0;
-            switch (count)
-            {
-                case 1:
-                    players = new List<Player> { new Player { Name = "Player 1" } };
-                    break;
-                case 2:
-                    players = new List<Player> { new Player { Name = "Player 1" }, new Player { Name = "Player 2" } };
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
+            if (count > 4)
+                throw new NotImplementedException();
+            players = defaultPlayersNames.GetRange(0, count).Select(n => new Player { Name = n }).ToList();
         }
 
         public void Match()
