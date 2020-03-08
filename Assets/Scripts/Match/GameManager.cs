@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace Assets.Scripts.Match
 {
+    /// <summary>
+    /// Starts the game, controls players, turns and score
+    /// </summary>
     public class GameManager : MonoBehaviour
     {
         public CardManager CardManager;
@@ -19,11 +22,18 @@ namespace Assets.Scripts.Match
             "Player 1", "Player 2", "Player 3", "Player 4"
         };
 
+        private const string turnsHighscorePlayerPref = "TurnsHighscore";
+        private const string timeHighscorePlayerPref = "TimeHighscore";
+        private int turnsPassed;
+        private float timePassed;
+        private SinglePlayerStats stats;
+
         private const bool isFreezeOnAnimation = true;
 
         private bool getInput = true;
 
         private bool isInitialized = false;
+        private bool isInGame = false;
 
         public void Start()
         {
@@ -38,17 +48,23 @@ namespace Assets.Scripts.Match
             if (IsGetInput())
                 InputManager.CheckForInput();
 
-            UIManager.DrawPlayers(players, activePlayer);
+            if (isInGame)
+                UpdateTimePassed();
+            if (GameSettings.PlayersCount == 1)
+                UIManager.DrawSinglePlayerStats(GetPlayerStats());
+            else
+                UIManager.DrawPlayers(players, activePlayer);
         }
 
         private bool IsGetInput()
         {
-            return getInput && !UIManager.IsUIMode() && (!isFreezeOnAnimation || !CardManager.IsAnimating());
+            return getInput && !UIManager.IsUIMode() && (!isFreezeOnAnimation || !CardManager.IsAnimating()) && isInGame;
         }
 
         public void StartGame()
         {
             InitializePlayers(GameSettings.PlayersCount);
+            InitializePlayerStats();
 
             CardManager = new CardManager(this);
             FieldParams fieldParams = new FieldParams { Height = GameSettings.FieldHeigth, Width = GameSettings.FieldWidth };
@@ -57,6 +73,7 @@ namespace Assets.Scripts.Match
             InputManager.AddSubscriber(CardManager);
             UIManager = FindObjectOfType<GameUIManager>();
 
+            isInGame = true;
             isInitialized = true;
         }
 
@@ -68,18 +85,68 @@ namespace Assets.Scripts.Match
             players = defaultPlayersNames.GetRange(0, count).Select(n => new Player { Name = n }).ToList();
         }
 
+        private void InitializePlayerStats()
+        {
+            timePassed = 0;
+            turnsPassed = 0;
+            stats = new SinglePlayerStats();
+            stats.TurnsHighscore = PlayerPrefs.GetInt(turnsHighscorePlayerPref, -1);
+            stats.TimeHighscore = PlayerPrefs.GetInt(timeHighscorePlayerPref, -1);
+        }
+
+        private SinglePlayerStats GetPlayerStats()
+        {
+            stats.Turns = turnsPassed;
+            stats.Time = (int)Math.Round(timePassed);
+
+            return stats;
+        }
+
+        private void SavePlayerStats()
+        {
+            if (stats.TurnsHighscore == -1 || turnsPassed < stats.TurnsHighscore)
+            {
+                PlayerPrefs.SetInt(turnsHighscorePlayerPref, turnsPassed);
+                stats.TurnsHighscore = turnsPassed;
+            }
+            if (stats.TimeHighscore == -1 || timePassed < stats.TimeHighscore)
+            {
+                PlayerPrefs.SetInt(timeHighscorePlayerPref, (int)Math.Round(timePassed));
+                stats.TimeHighscore = (int)Math.Round(timePassed);
+            }
+        }
+
+        private void UpdateTimePassed()
+        {
+            timePassed += Time.deltaTime;
+        }
+
+        private void UpdateTurnsPassed()
+        {
+            turnsPassed++;
+        }
+
         public void Match()
         {
             players[activePlayer].Score++;
+            UpdateTurnsPassed();
         }
 
         public void Unmatch()
+        {
+            PassPlayerTurn();
+            UpdateTurnsPassed();
+        }
+
+        private void PassPlayerTurn()
         {
             activePlayer = activePlayer + 1 > players.Count - 1 ? 0 : activePlayer + 1;
         }
 
         public void EndGame()
         {
+            SavePlayerStats();
+            isInGame = false;
             UIManager.OpenRestartMenu(1.5F);
         }
     }

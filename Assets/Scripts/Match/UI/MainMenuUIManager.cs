@@ -20,7 +20,7 @@ namespace Assets.Scripts.Match.UI
         private const string colorsCardPackButton = "ColorsCardPackButton";
         private const string geometryCardPackButton = "GeometryCardPackButton";
 
-        private CardPack defaultCardPackage = new CardPack("DefaultPack", 6, 5);
+        private CardPack defaultCardPackage = new CardPack("DefaultPack", 2, 2);
         private CardPack geometryCardPackage = new CardPack("GeometryPack", 5, 4);
         private CardPack colorsCardPackage = new CardPack("ColorsPack", 6, 5);
 
@@ -60,7 +60,11 @@ namespace Assets.Scripts.Match.UI
         private void SetDefaultCardPackage()
         {
             if (GameSettings.CardPackage == null)
+            {
                 GameSettings.CardPackage = defaultCardPackage;
+                GameSettings.FieldWidth = defaultCardPackage.MaxWidth;
+                GameSettings.FieldHeigth = defaultCardPackage.MaxHeigth;
+            }
         }
 
         public void PlayButtonClick()

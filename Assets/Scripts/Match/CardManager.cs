@@ -25,7 +25,7 @@ namespace Assets.Scripts.Match
         private const float portraitScaleFactor = 0.75F;
 
         private bool isAnimating = false;
-        private const float cardAnimationLength = 1F;
+        private const float cardAnimationLength = 0.6F;
 
         public CardManager(GameManager gameManager)
         {
@@ -108,6 +108,10 @@ namespace Assets.Scripts.Match
 
         public bool IsAnimating() => isAnimating;
 
+        /// <summary>
+        /// Handles click on some object
+        /// </summary>
+        /// <param name="gameObject">Object that was clicked</param>
         public void Handle(GameObject gameObject)
         {
             if (gameObject.TryGetComponent<Card>(out Card card))

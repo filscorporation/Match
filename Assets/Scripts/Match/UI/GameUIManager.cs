@@ -20,6 +20,11 @@ namespace Assets.Scripts.Match.UI
         private const string blurImageName = "Blur";
         private const string activePlayerFrameName = "ActivePlayerFrame";
 
+        private string turnsCounterTextName = "Turns Text";
+        private string timeMeterTextName = "Time Text";
+        private Text turnsCounterText;
+        private Text timeMeterText;
+
         private GameObject blur;
         private bool uiMode = false;
         private GameObject activePlayerFrame;
@@ -42,12 +47,15 @@ namespace Assets.Scripts.Match.UI
         protected override void WarmUp()
         {
             CanvasRenderer[] elements = Resources.FindObjectsOfTypeAll<CanvasRenderer>();
-            blur = elements.FirstOrDefault(o => o.name == blurImageName)?.gameObject;
+            blur = elements.FirstOrDefault(o => o.name == blurImageName).gameObject;
             if (blur != null)
             {
                 blur.GetComponent<Image>().rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
             }
-            activePlayerFrame = elements.FirstOrDefault(o => o.name == activePlayerFrameName)?.gameObject;
+            activePlayerFrame = elements.FirstOrDefault(o => o.name == activePlayerFrameName).gameObject;
+
+            turnsCounterText = elements.FirstOrDefault(o => o.name == turnsCounterTextName).gameObject.GetComponent<Text>();
+            timeMeterText = elements.FirstOrDefault(o => o.name == timeMeterTextName).gameObject.GetComponent<Text>();
         }
 
         /// <summary>
@@ -73,18 +81,33 @@ namespace Assets.Scripts.Match.UI
 
             foreach (Player player in players)
             {
-                playersTexts[player.Name].text = player.Name + ": " + player.Score;
+                playersTexts[player.Name].text = $"{player.Name}: {player.Score}";
             }
 
-            if (players.Count == 1)
+            activePlayerFrame.SetActive(true);
+            activePlayerFrame.transform.SetParent(playersTexts[players[active].Name].transform);
+            activePlayerFrame.transform.localPosition = Vector3.zero;
+        }
+
+        /// <summary>
+        /// Draws player stats
+        /// </summary>
+        /// <param name="stats"></param>
+        public void DrawSinglePlayerStats(SinglePlayerStats stats)
+        {
+            turnsCounterText.gameObject.SetActive(true);
+            timeMeterText.gameObject.SetActive(true);
+            turnsCounterText.text = $"Turns: {stats.Turns}";
+            if (stats.TurnsHighscore != -1)
+                turnsCounterText.text += $" (Best: {stats.TurnsHighscore})";
+            TimeSpan tt = TimeSpan.FromSeconds(stats.Time);
+            string ttString = tt.ToString("mm':'ss");
+            timeMeterText.text = $"Time: {ttString}";
+            if (stats.TimeHighscore != -1)
             {
-                activePlayerFrame.SetActive(false);
-            }
-            else
-            {
-                activePlayerFrame.SetActive(true);
-                activePlayerFrame.transform.SetParent(playersTexts[players[active].Name].transform);
-                activePlayerFrame.transform.localPosition = Vector3.zero;
+                TimeSpan th = TimeSpan.FromSeconds(stats.TimeHighscore);
+                string thString = th.ToString("mm':'ss");
+                timeMeterText.text += $" (Best: {thString})";
             }
         }
 
