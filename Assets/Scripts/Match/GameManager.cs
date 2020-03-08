@@ -90,8 +90,9 @@ namespace Assets.Scripts.Match
             timePassed = 0;
             turnsPassed = 0;
             stats = new SinglePlayerStats();
-            stats.TurnsHighscore = PlayerPrefs.GetInt(turnsHighscorePlayerPref, -1);
-            stats.TimeHighscore = PlayerPrefs.GetInt(timeHighscorePlayerPref, -1);
+            // Adding cardpack name to load highscore for current pack
+            stats.TurnsHighscore = PlayerPrefs.GetInt(turnsHighscorePlayerPref + GameSettings.CardPackage.Name, -1);
+            stats.TimeHighscore = PlayerPrefs.GetInt(timeHighscorePlayerPref + GameSettings.CardPackage.Name, -1);
         }
 
         private SinglePlayerStats GetPlayerStats()
@@ -106,12 +107,12 @@ namespace Assets.Scripts.Match
         {
             if (stats.TurnsHighscore == -1 || turnsPassed < stats.TurnsHighscore)
             {
-                PlayerPrefs.SetInt(turnsHighscorePlayerPref, turnsPassed);
+                PlayerPrefs.SetInt(turnsHighscorePlayerPref + GameSettings.CardPackage.Name, turnsPassed);
                 stats.TurnsHighscore = turnsPassed;
             }
             if (stats.TimeHighscore == -1 || timePassed < stats.TimeHighscore)
             {
-                PlayerPrefs.SetInt(timeHighscorePlayerPref, (int)Math.Round(timePassed));
+                PlayerPrefs.SetInt(timeHighscorePlayerPref + GameSettings.CardPackage.Name, (int)Math.Round(timePassed));
                 stats.TimeHighscore = (int)Math.Round(timePassed);
             }
         }
