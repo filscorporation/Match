@@ -147,8 +147,6 @@ namespace Assets.Scripts.Match
                         Thread.Sleep((int)(cardAnimationLength * 1000));
                         isAnimating = false;
                     });
-                    // TODO: remove
-                    gameManager.StartCoroutine(PlayCardFlipSound(1F));
 
                     if (lastActive.Index == card.Index)
                     {
@@ -159,6 +157,8 @@ namespace Assets.Scripts.Match
                     {
                         Debug.Log($"Unmatch");
                         Unmatch(lastActive, card);
+                        // TODO: remove
+                        gameManager.StartCoroutine(PlayCardFlipSound(1F));
                     }
                     lastActive = null;
                 }
