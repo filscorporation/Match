@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,11 +26,18 @@ namespace Assets.Scripts.Match
         private const float portraitScaleFactor = 0.75F;
 
         private bool isAnimating = false;
-        private const float cardAnimationLength = 0.6F;
+        private const float cardAnimationLength = 0.6F; public AudioClip AudioClip;
+
+        private const string soundFolderName = "Sounds";
+        private AudioSource audioSource;
+        private const string cardFlipSoundName = "CardFlipSound";
+        private AudioClip cardFlipSound;
 
         public CardManager(GameManager gameManager)
         {
             this.gameManager = gameManager;
+
+            PrepareSound();
         }
 
         public void InitializeField(FieldParams prs, CardPack cardPack)
@@ -123,6 +131,7 @@ namespace Assets.Scripts.Match
                     return;
                 if (card.State == CardState.Unactive)
                 {
+                    PlayCardFlipSound();
                     card.State = CardState.Active;
                 }
                 if (lastActive == null)
@@ -132,11 +141,14 @@ namespace Assets.Scripts.Match
                 else
                 {
                     isAnimating = true;
+                    PlayCardFlipSound();
                     Task.Run(() =>
                     {
                         Thread.Sleep((int)(cardAnimationLength * 1000));
                         isAnimating = false;
                     });
+                    // TODO: remove
+                    gameManager.StartCoroutine(PlayCardFlipSound(1F));
 
                     if (lastActive.Index == card.Index)
                     {
@@ -151,6 +163,30 @@ namespace Assets.Scripts.Match
                     lastActive = null;
                 }
             }
+        }
+
+        private void PrepareSound()
+        {
+            audioSource = Resources.FindObjectsOfTypeAll<AudioSource>().FirstOrDefault();
+            if (audioSource == null)
+            {
+                Debug.LogWarning("No audiosource");
+                return;
+            }
+
+            cardFlipSound = Resources.Load<AudioClip>(Path.Combine(soundFolderName, cardFlipSoundName));
+        }
+
+        private void PlayCardFlipSound()
+        {
+            Debug.Log("Playing");
+            audioSource.PlayOneShot(cardFlipSound);
+        }
+
+        IEnumerator PlayCardFlipSound(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            audioSource.PlayOneShot(cardFlipSound);
         }
 
         private void Match(Card a, Card b)
