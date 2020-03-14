@@ -16,15 +16,15 @@ namespace Assets.Scripts.Match.UI
         private const string twoPlayerButton = "TwoPlayerButton";
         private const string threePlayerButton = "ThreePlayerButton";
         private const string fourPlayerButton = "FourPlayerButton";
-        private const string defaultCardPackButton = "DefaultCardPackButton";
+        private const string kitchenCardPackButton = "KitchenCardPackButton";
+        private const string mythCardPackButton = "MythCardPackButton";
         private const string colorsCardPackButton = "ColorsCardPackButton";
         private const string geometryCardPackButton = "GeometryCardPackButton";
-        private const string mythCardPackButton = "MythCardPackButton";
 
-        private CardPack defaultCardPackage = new CardPack("DefaultPack", 6, 5);
+        private CardPack kitchenCardPackage = new CardPack("KitchenPack", 6, 5);
+        private CardPack mythCardPackage = new CardPack("MythPack", 6, 5);
         private CardPack geometryCardPackage = new CardPack("GeometryPack", 5, 4);
         private CardPack colorsCardPackage = new CardPack("ColorsPack", 6, 5);
-        private CardPack mythCardPackage = new CardPack("MythPack", 6, 5);
 
         private OptionsButtonsManager<CardPack> cardPacksButtons;
         private OptionsButtonsManager<int> playersCountButtons;
@@ -36,10 +36,10 @@ namespace Assets.Scripts.Match.UI
             { twoPlayerButton, null },
             { threePlayerButton, null },
             { fourPlayerButton, null },
-            { defaultCardPackButton, null },
+            { kitchenCardPackButton, null },
+            { mythCardPackButton, null },
             { colorsCardPackButton, null },
             { geometryCardPackButton, null },
-            { mythCardPackButton, null },
         };
 
         protected override void WarmUp()
@@ -54,10 +54,10 @@ namespace Assets.Scripts.Match.UI
             playersCountButtons = new OptionsButtonsManager<int>(pcbs, GameSettings.PlayersCount);
 
             List<ButtonWrapper<CardPack>> cpbs = new List<ButtonWrapper<CardPack>>();
-            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[defaultCardPackButton], defaultCardPackage));
+            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[kitchenCardPackButton], kitchenCardPackage));
+            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[mythCardPackButton], mythCardPackage));
             cpbs.Add(new ButtonWrapper<CardPack>(Buttons[colorsCardPackButton], colorsCardPackage));
             cpbs.Add(new ButtonWrapper<CardPack>(Buttons[geometryCardPackButton], geometryCardPackage));
-            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[mythCardPackButton], mythCardPackage));
             cardPacksButtons = new OptionsButtonsManager<CardPack>(cpbs, GameSettings.CardPackage);
         }
 
@@ -65,9 +65,9 @@ namespace Assets.Scripts.Match.UI
         {
             if (GameSettings.CardPackage == null)
             {
-                GameSettings.CardPackage = defaultCardPackage;
-                GameSettings.FieldWidth = defaultCardPackage.MaxWidth;
-                GameSettings.FieldHeigth = defaultCardPackage.MaxHeigth;
+                GameSettings.CardPackage = kitchenCardPackage;
+                GameSettings.FieldWidth = kitchenCardPackage.MaxWidth;
+                GameSettings.FieldHeigth = kitchenCardPackage.MaxHeigth;
             }
         }
 
@@ -100,9 +100,17 @@ namespace Assets.Scripts.Match.UI
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
         }
 
-        public void DefaultCardPackButtonClick()
+        public void KitchenCardPackButtonClick()
         {
-            GameSettings.CardPackage = defaultCardPackage;
+            GameSettings.CardPackage = kitchenCardPackage;
+            GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
+            GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
+            cardPacksButtons.SelectOption(GameSettings.CardPackage);
+        }
+
+        public void MythCardPackButtonClick()
+        {
+            GameSettings.CardPackage = mythCardPackage;
             GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
             GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
             cardPacksButtons.SelectOption(GameSettings.CardPackage);
@@ -119,14 +127,6 @@ namespace Assets.Scripts.Match.UI
         public void GeometryCardPackButtonClick()
         {
             GameSettings.CardPackage = geometryCardPackage;
-            GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
-            GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
-            cardPacksButtons.SelectOption(GameSettings.CardPackage);
-        }
-
-        public void MythCardPackButtonClick()
-        {
-            GameSettings.CardPackage = mythCardPackage;
             GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
             GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
             cardPacksButtons.SelectOption(GameSettings.CardPackage);
