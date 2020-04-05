@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -16,15 +14,14 @@ namespace Assets.Scripts.Match.UI
         private const string twoPlayerButton = "TwoPlayerButton";
         private const string threePlayerButton = "ThreePlayerButton";
         private const string fourPlayerButton = "FourPlayerButton";
-        private const string kitchenCardPackButton = "KitchenCardPackButton";
-        private const string mythCardPackButton = "MythCardPackButton";
-        private const string colorsCardPackButton = "ColorsCardPackButton";
-        private const string geometryCardPackButton = "GeometryCardPackButton";
 
-        private CardPack kitchenCardPackage = new CardPack("KitchenPack", 6, 5);
-        private CardPack mythCardPackage = new CardPack("MythPack", 6, 5);
-        private CardPack geometryCardPackage = new CardPack("GeometryPack", 5, 4);
-        private CardPack colorsCardPackage = new CardPack("ColorsPack", 6, 5);
+        private const string kitchenCardPackButton = "KitchenCardPackButton";
+        private const string artCardPackButton = "ArtCardPackButton";
+        private const string oceanCardPackButton = "OceanCardPackButton";
+
+        private readonly CardPack kitchenCardPackage = new CardPack("KitchenPack", 5, 6);
+        private readonly CardPack artCardPackage = new CardPack("ArtPack", 5, 6);
+        private readonly CardPack oceanCardPackage = new CardPack("OceanPack", 5, 6);
 
         private OptionsButtonsManager<CardPack> cardPacksButtons;
         private OptionsButtonsManager<int> playersCountButtons;
@@ -37,9 +34,8 @@ namespace Assets.Scripts.Match.UI
             { threePlayerButton, null },
             { fourPlayerButton, null },
             { kitchenCardPackButton, null },
-            { mythCardPackButton, null },
-            { colorsCardPackButton, null },
-            { geometryCardPackButton, null },
+            { artCardPackButton, null },
+            { oceanCardPackButton, null },
         };
 
         protected override void WarmUp()
@@ -55,9 +51,8 @@ namespace Assets.Scripts.Match.UI
 
             List<ButtonWrapper<CardPack>> cpbs = new List<ButtonWrapper<CardPack>>();
             cpbs.Add(new ButtonWrapper<CardPack>(Buttons[kitchenCardPackButton], kitchenCardPackage));
-            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[mythCardPackButton], mythCardPackage));
-            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[colorsCardPackButton], colorsCardPackage));
-            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[geometryCardPackButton], geometryCardPackage));
+            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[artCardPackButton], artCardPackage));
+            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[oceanCardPackButton], oceanCardPackage));
             cardPacksButtons = new OptionsButtonsManager<CardPack>(cpbs, GameSettings.CardPackage);
         }
 
@@ -108,25 +103,17 @@ namespace Assets.Scripts.Match.UI
             cardPacksButtons.SelectOption(GameSettings.CardPackage);
         }
 
-        public void MythCardPackButtonClick()
+        public void ArtCardPackButtonClick()
         {
-            GameSettings.CardPackage = mythCardPackage;
+            GameSettings.CardPackage = artCardPackage;
             GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
             GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
             cardPacksButtons.SelectOption(GameSettings.CardPackage);
         }
 
-        public void ColorsCardPackButtonClick()
+        public void OceanCardPackButtonClick()
         {
-            GameSettings.CardPackage = colorsCardPackage;
-            GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
-            GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
-            cardPacksButtons.SelectOption(GameSettings.CardPackage);
-        }
-
-        public void GeometryCardPackButtonClick()
-        {
-            GameSettings.CardPackage = geometryCardPackage;
+            GameSettings.CardPackage = oceanCardPackage;
             GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
             GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
             cardPacksButtons.SelectOption(GameSettings.CardPackage);

@@ -1,10 +1,7 @@
 fileFormatVersion: 2
-guid: 00155675da27f4d4a91a3f6b7038d477
+guid: 692c00b8e5eb73a409d70cfafa6b59e8
 TextureImporter:
-  internalIDToNameTable:
-  - first:
-      213: -5548141348345981744
-    second: BaseButton_0
+  internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -43,13 +40,13 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 60, y: 57, z: 55, w: 81}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1

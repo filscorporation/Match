@@ -1,10 +1,7 @@
 fileFormatVersion: 2
-guid: 00155675da27f4d4a91a3f6b7038d477
+guid: 5b6b7964011bd90458483ad3d60b321d
 TextureImporter:
-  internalIDToNameTable:
-  - first:
-      213: -5548141348345981744
-    second: BaseButton_0
+  internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -49,7 +46,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 60, y: 57, z: 55, w: 81}
+  spriteBorder: {x: 80, y: 80, z: 80, w: 80}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1

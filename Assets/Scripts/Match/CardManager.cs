@@ -23,7 +23,7 @@ namespace Assets.Scripts.Match
         private const string cardPacksFolder = "CardPacks";
         private const string cardsFolder = "Cards";
         private const string cardbackFileName = "CardBack";
-        private const float portraitScaleFactor = 0.75F;
+        private const float portraitScaleFactor = 0.9F;
 
         private bool isAnimating = false;
         private const float cardAnimationLength = 0.6F; public AudioClip AudioClip;
@@ -54,7 +54,7 @@ namespace Assets.Scripts.Match
                 cards = new Card[prs.Height][];
                 cardPrefabs = GetCardPrefabs(cardPack.Name, out Vector2 cardSize);
                 if (cardPrefabs.Count < prs.Width * prs.Height / 2)
-                    throw new Exception("Not enougth images for field size");
+                    throw new Exception("Not enough images for field size");
 
                 List<int> seed = new List<int>(prs.Width * prs.Height);
                 for (int i = 0; i < prs.Width * prs.Height; i++)
@@ -249,8 +249,9 @@ namespace Assets.Scripts.Match
 
             // Dense
             float gapIndex = 1.05F;
+            float yOffset = 0.5F;
             float x = (i - (float)widthAmount / 2 + 0.5F) * cardSize.x * gapIndex;
-            float y = (j - (float)heigthAmount / 2 + 0.5F) * cardSize.y * gapIndex;
+            float y = (j - (float)heigthAmount / 2 + 0.5F) * cardSize.y * gapIndex - yOffset;
             return new Vector3(x, y);
         }
 
