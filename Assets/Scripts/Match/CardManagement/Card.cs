@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Assets.Scripts.Match
+namespace Assets.Scripts.Match.CardManagement
 {
     public enum CardState
     {

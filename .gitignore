@@ -58,3 +58,7 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+/MatchServer/MatchServer/obj
+/MatchServer/MatchServer/bin/Debug/netcoreapp3.1
+/MatchServer/NetworkShared/obj
+/MatchServer/NetworkShared/bin/Debug/netstandard2.0

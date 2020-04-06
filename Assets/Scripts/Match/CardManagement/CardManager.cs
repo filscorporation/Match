@@ -6,10 +6,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Assets.Scripts.Match.Exceptions;
+using Assets.Scripts.Match.InputManagement;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Assets.Scripts.Match
+namespace Assets.Scripts.Match.CardManagement
 {
     public class CardManager : IInputSubscriber
     {
@@ -94,6 +95,52 @@ namespace Assets.Scripts.Match
             Debug.Log("Finish initializing field");
         }
 
+        public void InitializeField(FieldParams prs, CardPack cardPack, int[,] fieldData)
+        {
+            Debug.Log("Start initializing field");
+
+            if (cardPack == null)
+                throw new ArgumentNullException(nameof(cardPack));
+
+            List<Object> cardPrefabs = new List<Object>();
+            try
+            {
+                ClearField();
+                cards = new Card[prs.Height][];
+                cardPrefabs = GetCardPrefabs(cardPack.Name, out Vector2 cardSize);
+                if (cardPrefabs.Count < prs.Width * prs.Height / 2)
+                    throw new Exception("Not enough images for field size");
+                
+                fieldParent = new GameObject().transform;
+                fieldParent.gameObject.name = "Field";
+
+                float cardScale = GetCardScale(prs.Width, prs.Height, Screen.width, Screen.height);
+                cardSize = new Vector2(cardSize.x * cardScale, cardSize.y * cardScale);
+
+                for (int j = 0; j < prs.Height; j++)
+                {
+                    cards[j] = new Card[prs.Width];
+                    for (int i = 0; i < prs.Width; i++)
+                    {
+                        Vector2 position = GetCardPosition(prs.Width, prs.Height, Screen.width, Screen.height, i, j,
+                            cardSize);
+                        int index = fieldData[j, i];
+                        Card card = CreateCard(cardPrefabs[index], position, cardScale, index);
+                        cards[j][i] = card;
+                    }
+                }
+            }
+            finally
+            {
+                foreach (Object cardPrefab in cardPrefabs)
+                {
+                    Object.Destroy(cardPrefab);
+                }
+            }
+
+            Debug.Log("Finish initializing field");
+        }
+
         public void ClearField()
         {
             if (fieldParent != null)
@@ -112,6 +159,20 @@ namespace Assets.Scripts.Match
                     Object.Destroy(card);
                 }
             }
+        }
+
+        public int[,] GetFieldData()
+        {
+            int[,] data = new int[cards.Length, cards[0].Length];
+            for (int j = 0; j < cards.Length; j++)
+            {
+                for (int i = 0; i < cards[0].Length; i++)
+                {
+                    data[j,i] = cards[j][i].Index;
+                }
+            }
+
+            return data;
         }
 
         public bool IsAnimating() => isAnimating;

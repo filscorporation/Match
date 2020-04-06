@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Assets.Scripts.Match
+namespace Assets.Scripts.Match.InputManagement
 {
     /// <summary>
     /// Interface for subscribers to input

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Assets.Scripts.Match.CardManagement;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -19,9 +20,9 @@ namespace Assets.Scripts.Match.UI
         private const string artCardPackButton = "ArtCardPackButton";
         private const string oceanCardPackButton = "OceanCardPackButton";
 
-        private readonly CardPack kitchenCardPackage = new CardPack("KitchenPack", 5, 6);
-        private readonly CardPack artCardPackage = new CardPack("ArtPack", 5, 6);
-        private readonly CardPack oceanCardPackage = new CardPack("OceanPack", 5, 6);
+        private readonly CardPack kitchenCardPackage = CardPackages.Packages["KitchenPack"];
+        private readonly CardPack artCardPackage = CardPackages.Packages["ArtPack"];
+        private readonly CardPack oceanCardPackage = CardPackages.Packages["OceanPack"];
 
         private OptionsButtonsManager<CardPack> cardPacksButtons;
         private OptionsButtonsManager<int> playersCountButtons;
@@ -62,12 +63,15 @@ namespace Assets.Scripts.Match.UI
             {
                 GameSettings.CardPackage = kitchenCardPackage;
                 GameSettings.FieldWidth = kitchenCardPackage.MaxWidth;
-                GameSettings.FieldHeigth = kitchenCardPackage.MaxHeigth;
+                GameSettings.FieldHeight = kitchenCardPackage.MaxHeight;
             }
         }
 
         public void PlayButtonClick()
         {
+            // TODO: temp
+            if (GameSettings.PlayersCount == 2)
+                GameSettings.IsOnline = true;
             SceneManager.LoadScene(gameSceneName);
         }
 
@@ -98,7 +102,7 @@ namespace Assets.Scripts.Match.UI
         public void KitchenCardPackButtonClick()
         {
             GameSettings.CardPackage = kitchenCardPackage;
-            GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
+            GameSettings.FieldHeight = GameSettings.CardPackage.MaxHeight;
             GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
             cardPacksButtons.SelectOption(GameSettings.CardPackage);
         }
@@ -106,7 +110,7 @@ namespace Assets.Scripts.Match.UI
         public void ArtCardPackButtonClick()
         {
             GameSettings.CardPackage = artCardPackage;
-            GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
+            GameSettings.FieldHeight = GameSettings.CardPackage.MaxHeight;
             GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
             cardPacksButtons.SelectOption(GameSettings.CardPackage);
         }
@@ -114,7 +118,7 @@ namespace Assets.Scripts.Match.UI
         public void OceanCardPackButtonClick()
         {
             GameSettings.CardPackage = oceanCardPackage;
-            GameSettings.FieldHeigth = GameSettings.CardPackage.MaxHeigth;
+            GameSettings.FieldHeight = GameSettings.CardPackage.MaxHeight;
             GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
             cardPacksButtons.SelectOption(GameSettings.CardPackage);
         }

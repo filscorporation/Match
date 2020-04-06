@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Match.Networking;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -148,6 +149,8 @@ namespace Assets.Scripts.Match.UI
 
         public void ToMainMenuButtonClick()
         {
+            NetworkManager.Instance.DisconnectPlayer();
+
             SceneManager.LoadScene(mainMenuSceneName);
         }
 

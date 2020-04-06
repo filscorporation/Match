@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Scripts.Match.CardManagement;
 
 namespace Assets.Scripts.Match
 {
@@ -7,10 +8,16 @@ namespace Assets.Scripts.Match
     {
         public static int FieldWidth;
 
-        public static int FieldHeigth;
+        public static int FieldHeight;
 
         public static int PlayersCount = 2;
 
         public static CardPack CardPackage;
+
+        public static bool IsOnline = false;
+
+        public static bool IsFromData = false;
+
+        public static int[,] FieldData;
     }
 }

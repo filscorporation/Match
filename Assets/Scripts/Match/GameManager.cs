@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Match.CardManagement;
+using Assets.Scripts.Match.InputManagement;
+using Assets.Scripts.Match.Networking;
 using Assets.Scripts.Match.UI;
 using UnityEngine;
 
@@ -11,6 +14,20 @@ namespace Assets.Scripts.Match
     /// </summary>
     public class GameManager : MonoBehaviour
     {
+        private static GameManager instance;
+
+        public static GameManager Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = FindObjectOfType<GameManager>();
+                }
+                return instance;
+            }
+        }
+
         public CardManager CardManager;
         public GameUIManager UIManager;
         public IInputManager InputManager;
@@ -67,8 +84,19 @@ namespace Assets.Scripts.Match
             InitializePlayerStats();
 
             CardManager = new CardManager(this);
-            FieldParams fieldParams = new FieldParams { Height = GameSettings.FieldHeigth, Width = GameSettings.FieldWidth };
-            CardManager.InitializeField(fieldParams, GameSettings.CardPackage);
+            FieldParams fieldParams = new FieldParams { Height = GameSettings.FieldHeight, Width = GameSettings.FieldWidth };
+            if (GameSettings.IsFromData)
+            {
+                GameSettings.IsFromData = false;
+                CardManager.InitializeField(fieldParams, GameSettings.CardPackage, GameSettings.FieldData);
+            }
+            else
+            {
+                if (GameSettings.IsOnline)
+                    NetworkManager.Instance.ConnectPlayer();
+                CardManager.InitializeField(fieldParams, GameSettings.CardPackage);
+            }
+
             InputManager = new PCInputManager();
             InputManager.AddSubscriber(CardManager);
             UIManager = FindObjectOfType<GameUIManager>();

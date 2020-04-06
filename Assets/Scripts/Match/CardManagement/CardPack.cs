@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Assets.Scripts.Match
+namespace Assets.Scripts.Match.CardManagement
 {
     /// <summary>
     /// Card package parameters
@@ -9,17 +9,17 @@ namespace Assets.Scripts.Match
     [Serializable]
     public class CardPack
     {
-        public string Name;
+        public readonly string Name;
 
-        public int MaxWidth;
+        public readonly int MaxWidth;
 
-        public int MaxHeigth;
+        public readonly int MaxHeight;
 
-        public CardPack(string name, int maxWidth, int maxHeigth)
+        public CardPack(string name, int maxWidth, int maxHeight)
         {
             Name = name;
             MaxWidth = maxWidth;
-            MaxHeigth = maxHeigth;
+            MaxHeight = maxHeight;
         }
 
         public override bool Equals(object obj)
@@ -35,7 +35,7 @@ namespace Assets.Scripts.Match
             var hashCode = -312013121;
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
             hashCode = hashCode * -1521134295 + MaxWidth.GetHashCode();
-            hashCode = hashCode * -1521134295 + MaxHeigth.GetHashCode();
+            hashCode = hashCode * -1521134295 + MaxHeight.GetHashCode();
             return hashCode;
         }
     }
