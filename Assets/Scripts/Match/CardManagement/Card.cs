@@ -13,6 +13,8 @@ namespace Assets.Scripts.Match.CardManagement
     public class Card : MonoBehaviour
     {
         public int Index;
+        public int X;
+        public int Y;
 
         private CardState state = CardState.Unactive;
 

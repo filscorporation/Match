@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Assets.Scripts.Match.Exceptions;
 using Assets.Scripts.Match.InputManagement;
+using Assets.Scripts.Match.Networking;
+using NetworkShared.Data;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -80,6 +82,8 @@ namespace Assets.Scripts.Match.CardManagement
                             cardSize);
                         int index = seed[j * prs.Width + i] / 2;
                         Card card = CreateCard(cardPrefabs[index], position, cardScale, index);
+                        card.X = j;
+                        card.Y = i;
                         cards[j][i] = card;
                     }
                 }
@@ -126,6 +130,8 @@ namespace Assets.Scripts.Match.CardManagement
                             cardSize);
                         int index = fieldData[j, i];
                         Card card = CreateCard(cardPrefabs[index], position, cardScale, index);
+                        card.X = j;
+                        card.Y = i;
                         cards[j][i] = card;
                     }
                 }
@@ -178,10 +184,20 @@ namespace Assets.Scripts.Match.CardManagement
         public bool IsAnimating() => isAnimating;
 
         /// <summary>
+        /// Handles click on card by X Y
+        /// </summary>
+        /// <param name="data"></param>
+        public void Handle(PlayersTurnData data)
+        {
+            Handle(cards[data.CardRevealedX][data.CardRevealedY].gameObject, false);
+        }
+
+        /// <summary>
         /// Handles click on some object
         /// </summary>
         /// <param name="gameObject">Object that was clicked</param>
-        public void Handle(GameObject gameObject)
+        /// <param name="notifyServer"></param>
+        public void Handle(GameObject gameObject, bool notifyServer = true)
         {
             if (gameObject.TryGetComponent<Card>(out Card card))
             {
@@ -192,6 +208,13 @@ namespace Assets.Scripts.Match.CardManagement
                     return;
                 if (card.State == CardState.Unactive)
                 {
+                    if (GameSettings.IsOnline && notifyServer)
+                    {
+                        PlayersTurnData data = new PlayersTurnData();
+                        data.CardRevealedX = card.X;
+                        data.CardRevealedY = card.Y;
+                        NetworkManager.Instance.SendPlayersTurn(data);
+                    }
                     PlayCardFlipSound();
                     card.State = CardState.Active;
                 }

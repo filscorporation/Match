@@ -11,6 +11,7 @@ namespace Assets.Scripts.Match.InputManagement
         /// Handles click on some object
         /// </summary>
         /// <param name="gameObject">Object that was clicked</param>
-        void Handle(GameObject gameObject);
+        /// <param name="notifyServer"></param>
+        void Handle(GameObject gameObject, bool notifyServer = true);
     }
 }

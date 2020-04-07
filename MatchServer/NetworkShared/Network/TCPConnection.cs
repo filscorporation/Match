@@ -83,7 +83,7 @@ namespace NetworkShared.Network
         /// </summary>
         public void Disconnect()
         {
-            Console.WriteLine($"Disconnecting {Socket.Client.RemoteEndPoint}");
+            Console.WriteLine($"Disconnecting {Socket?.Client?.RemoteEndPoint}");
 
             Socket?.Close();
             stream = null;

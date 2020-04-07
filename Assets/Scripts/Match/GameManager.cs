@@ -75,7 +75,11 @@ namespace Assets.Scripts.Match
 
         private bool IsGetInput()
         {
-            return getInput && !UIManager.IsUIMode() && (!isFreezeOnAnimation || !CardManager.IsAnimating()) && isInGame;
+            return getInput
+                   && !UIManager.IsUIMode()
+                   && (!isFreezeOnAnimation || !CardManager.IsAnimating())
+                   && isInGame
+                   && (!GameSettings.IsOnline || NetworkManager.Instance.ThisPlayerID == activePlayer);
         }
 
         public void StartGame()
@@ -89,6 +93,7 @@ namespace Assets.Scripts.Match
             {
                 GameSettings.IsFromData = false;
                 CardManager.InitializeField(fieldParams, GameSettings.CardPackage, GameSettings.FieldData);
+                NetworkManager.Instance.ThisPlayerID = 0;
             }
             else
             {

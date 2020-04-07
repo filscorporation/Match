@@ -15,6 +15,7 @@ namespace Assets.Scripts.Match.UI
         private const string twoPlayerButton = "TwoPlayerButton";
         private const string threePlayerButton = "ThreePlayerButton";
         private const string fourPlayerButton = "FourPlayerButton";
+        private const string onlineButton = "OnlineButton";
 
         private const string kitchenCardPackButton = "KitchenCardPackButton";
         private const string artCardPackButton = "ArtCardPackButton";
@@ -34,6 +35,7 @@ namespace Assets.Scripts.Match.UI
             { twoPlayerButton, null },
             { threePlayerButton, null },
             { fourPlayerButton, null },
+            { onlineButton, null },
             { kitchenCardPackButton, null },
             { artCardPackButton, null },
             { oceanCardPackButton, null },
@@ -48,7 +50,8 @@ namespace Assets.Scripts.Match.UI
             pcbs.Add(new ButtonWrapper<int>(Buttons[twoPlayerButton], 2));
             pcbs.Add(new ButtonWrapper<int>(Buttons[threePlayerButton], 3));
             pcbs.Add(new ButtonWrapper<int>(Buttons[fourPlayerButton], 4));
-            playersCountButtons = new OptionsButtonsManager<int>(pcbs, GameSettings.PlayersCount);
+            pcbs.Add(new ButtonWrapper<int>(Buttons[onlineButton], 0));
+            playersCountButtons = new OptionsButtonsManager<int>(pcbs, GameSettings.IsOnline ? 0 : GameSettings.PlayersCount);
 
             List<ButtonWrapper<CardPack>> cpbs = new List<ButtonWrapper<CardPack>>();
             cpbs.Add(new ButtonWrapper<CardPack>(Buttons[kitchenCardPackButton], kitchenCardPackage));
@@ -69,34 +72,42 @@ namespace Assets.Scripts.Match.UI
 
         public void PlayButtonClick()
         {
-            // TODO: temp
-            if (GameSettings.PlayersCount == 2)
-                GameSettings.IsOnline = true;
             SceneManager.LoadScene(gameSceneName);
         }
 
         public void SinglePlayerButtonClick()
         {
             GameSettings.PlayersCount = 1;
+            GameSettings.IsOnline = false;
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
         }
 
         public void TwoPlayerButtonClick()
         {
             GameSettings.PlayersCount = 2;
+            GameSettings.IsOnline = false;
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
         }
 
         public void ThreePlayerButtonClick()
         {
             GameSettings.PlayersCount = 3;
+            GameSettings.IsOnline = false;
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
         }
 
         public void FourPlayerButtonClick()
         {
             GameSettings.PlayersCount = 4;
+            GameSettings.IsOnline = false;
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
+        }
+
+        public void OnlineButtonClick()
+        {
+            GameSettings.PlayersCount = 2;
+            GameSettings.IsOnline = true;
+            playersCountButtons.SelectOption(0);
         }
 
         public void KitchenCardPackButtonClick()

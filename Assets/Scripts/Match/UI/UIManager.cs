@@ -39,7 +39,7 @@ namespace Assets.Scripts.Match.UI
             List<GameObject> objects = Resources.FindObjectsOfTypeAll<Button>().Select(b => b.gameObject).ToList();
             foreach (string button in buttonNames)
             {
-                Buttons[button] = objects.FirstOrDefault(o => o.name == button).GetComponent<Button>();
+                Buttons[button] = objects.FirstOrDefault(o => o.name == button)?.GetComponent<Button>();
             }
         }
 

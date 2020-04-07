@@ -5,6 +5,8 @@ namespace NetworkShared.Data
     [Serializable]
     public class PlayersTurnData
     {
-        public int CardRevealed;
+        public int CardRevealedX;
+
+        public int CardRevealedY;
     }
 }

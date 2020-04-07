@@ -27,7 +27,8 @@ namespace Assets.Scripts.Match.Networking
             }
         }
 
-        private Client client;
+        private static Client client;
+        public int ThisPlayerID;
 
         public void Update()
         {
@@ -56,6 +57,7 @@ namespace Assets.Scripts.Match.Networking
             switch ((DataTypes)type)
             {
                 case DataTypes.StartGame:
+                    ThisPlayerID = 1;
                     GameData newGameData = new GameData();
                     newGameData.Field = GameManager.Instance.CardManager.GetFieldData();
                     newGameData.CardPackName = GameSettings.CardPackage.Name;
@@ -69,9 +71,16 @@ namespace Assets.Scripts.Match.Networking
                     SceneManager.LoadScene("GameScene");
                     break;
                 case DataTypes.PlayersTurnData:
+                    GameManager.Instance.CardManager.Handle((PlayersTurnData)data);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
+        }
+
+        public void SendPlayersTurn(PlayersTurnData playersTurnData)
+        {
+            client.SendData((int)DataTypes.PlayersTurnData, playersTurnData);
         }
 
         public static void Log(string msg)

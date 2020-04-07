@@ -69,6 +69,15 @@ namespace MatchServer
 
         public void ClientDisconnected(int clientID)
         {
+            GameMatch match = matches.FirstOrDefault(m => m.ContainsPlayer(clientID));
+            if (match != null)
+            {
+                Console.WriteLine($"Dropping match between {match.Player1.ID} and {match.Player2.ID}");
+                match.Player1.IsInGame = false;
+                match.Player2.IsInGame = false;
+                matches.Remove(match);
+            }
+
             if (players.RemoveAll(p => p.ID == clientID) == 0)
             {
                 Console.WriteLine($"Player {clientID} doesn't exist");
@@ -83,40 +92,78 @@ namespace MatchServer
             switch ((DataTypes)dataType)
             {
                 case DataTypes.GameData:
-                    Player player = players.FirstOrDefault(p => p.ID == clientID);
-                    if (player == null)
-                    {
-                        Console.WriteLine($"Player {clientID} doesn't exist");
-                        return;
-                    }
-                    if (!player.IsInGame)
-                    {
-                        Console.WriteLine($"Player {clientID} isn't in game");
-                        return;
-                    }
-
-                    GameMatch match = matches.FirstOrDefault(m => m.Player1 == player);
-                    if (match == null)
-                    {
-                        Console.WriteLine($"Error finding players {clientID} match");
-                        return;
-                    }
-                    if (match.IsInitialized)
-                    {
-                        Console.WriteLine($"Match already initialized");
-                        return;
-                    }
-
-                    match.IsInitialized = true;
-
-                    Server.SendDataToClient(match.Player2.ID, (int)DataTypes.GameData, data);
+                    ProcessGameData(data, clientID);
                     break;
                 case DataTypes.PlayersTurnData:
+                    ProcessPlayerTurnData((PlayersTurnData) data, clientID);
                     break;
                 case DataTypes.StartGame:
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
             }
+        }
+
+        private void ProcessGameData(object data, int clientID)
+        {
+            Player player = players.FirstOrDefault(p => p.ID == clientID);
+            if (player == null)
+            {
+                Console.WriteLine($"Player {clientID} doesn't exist");
+                return;
+            }
+            if (!player.IsInGame)
+            {
+                Console.WriteLine($"Player {clientID} isn't in game");
+                return;
+            }
+
+            GameMatch match = matches.FirstOrDefault(m => m.Player1 == player);
+            if (match == null)
+            {
+                Console.WriteLine($"Error finding players {clientID} match");
+                return;
+            }
+            if (match.IsInitialized)
+            {
+                Console.WriteLine($"Match already initialized");
+                return;
+            }
+
+            match.IsInitialized = true;
+
+            Server.SendDataToClient(match.Player2.ID, (int)DataTypes.GameData, data);
+        }
+
+        private void ProcessPlayerTurnData(PlayersTurnData data, int clientID)
+        {
+            Player player = players.FirstOrDefault(p => p.ID == clientID);
+            if (player == null)
+            {
+                Console.WriteLine($"Player {clientID} doesn't exist");
+                return;
+            }
+            if (!player.IsInGame)
+            {
+                Console.WriteLine($"Player {clientID} isn't in game");
+                return;
+            }
+
+            GameMatch match = matches.FirstOrDefault(m => m.Player1 == player || m.Player2 == player);
+            if (match == null)
+            {
+                Console.WriteLine($"Error finding players {clientID} match");
+                return;
+            }
+            if (!match.IsInitialized)
+            {
+                Console.WriteLine($"Match isn't initialized");
+                return;
+            }
+
+            if (clientID == 1)
+                Server.SendDataToClient(match.Player2.ID, (int)DataTypes.PlayersTurnData, data);
+            else
+                Server.SendDataToClient(match.Player1.ID, (int)DataTypes.PlayersTurnData, data);
         }
 
         private bool TryCreateMatch()
