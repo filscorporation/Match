@@ -2,7 +2,15 @@
 {
     public class GameMatch
     {
-        public bool IsInitialized = false;
+        public string RoomID;
+
+        public string CardPackName;
+
+        public int Width;
+
+        public int Height;
+
+        public bool IsRunning = false;
 
         public Player Player1;
 
@@ -10,7 +18,7 @@
 
         public bool ContainsPlayer(int id)
         {
-            return Player1.ID == id || Player2.ID == id;
+            return Player1 != null && Player1.ID == id || Player2 != null && Player2.ID == id;
         }
     }
 }

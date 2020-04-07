@@ -16,8 +16,8 @@ namespace Assets.Scripts.Match
 
         public static bool IsOnline = false;
 
-        public static bool IsFromData = false;
-
         public static int[,] FieldData;
+
+        public static int PlayerID;
     }
 }

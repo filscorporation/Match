@@ -2,8 +2,9 @@
 {
     public enum DataTypes
     {
-        GameData = 1,
+        StartGameResponse = 1,
         PlayersTurnData = 2,
-        StartGame = 3,
+        CreateGameRequest = 4,
+        JoinGameRequest = 5,
     }
 }

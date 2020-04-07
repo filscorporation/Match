@@ -167,20 +167,6 @@ namespace Assets.Scripts.Match.CardManagement
             }
         }
 
-        public int[,] GetFieldData()
-        {
-            int[,] data = new int[cards.Length, cards[0].Length];
-            for (int j = 0; j < cards.Length; j++)
-            {
-                for (int i = 0; i < cards[0].Length; i++)
-                {
-                    data[j,i] = cards[j][i].Index;
-                }
-            }
-
-            return data;
-        }
-
         public bool IsAnimating() => isAnimating;
 
         /// <summary>

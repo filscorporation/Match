@@ -149,8 +149,6 @@ namespace Assets.Scripts.Match.UI
 
         public void ToMainMenuButtonClick()
         {
-            NetworkManager.Instance.DisconnectPlayer();
-
             SceneManager.LoadScene(mainMenuSceneName);
         }
 

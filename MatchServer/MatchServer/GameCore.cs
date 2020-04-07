@@ -25,6 +25,8 @@ namespace MatchServer
             matches = new List<GameMatch>();
         }
 
+        #region Core
+
         public void Start()
         {
             Console.WriteLine($"Game thread started. Running at {TicksPerSec} ticks per second.");
@@ -53,6 +55,10 @@ namespace MatchServer
             ThreadManager.UpdateMain();
         }
 
+        #endregion
+
+        #region Clients
+
         public void ClientConnected(int clientID)
         {
             if (players.Any(p => p.ID == clientID))
@@ -63,8 +69,6 @@ namespace MatchServer
 
             Console.WriteLine($"Adding player {clientID} to the game");
             players.Add(new Player(clientID));
-
-            TryCreateMatch();
         }
 
         public void ClientDisconnected(int clientID)
@@ -72,9 +76,9 @@ namespace MatchServer
             GameMatch match = matches.FirstOrDefault(m => m.ContainsPlayer(clientID));
             if (match != null)
             {
-                Console.WriteLine($"Dropping match between {match.Player1.ID} and {match.Player2.ID}");
-                match.Player1.IsInGame = false;
-                match.Player2.IsInGame = false;
+                Console.WriteLine($"Dropping room {match.RoomID}");
+                if (match.Player1 != null) match.Player1.Match = null;
+                if (match.Player2 != null) match.Player2.Match = null;
                 matches.Remove(match);
             }
 
@@ -87,51 +91,110 @@ namespace MatchServer
             Console.WriteLine($"Removing player {clientID} from the game");
         }
 
+        #endregion
+
+        #region Data
+
         public void ClientSentData(int clientID, int dataType, object data)
         {
             switch ((DataTypes)dataType)
             {
-                case DataTypes.GameData:
-                    ProcessGameData(data, clientID);
+                case DataTypes.CreateGameRequest:
+                    ProcessCreateGameRequest((CreateGameRequest) data, clientID);
+                    break;
+                case DataTypes.JoinGameRequest:
+                    ProcessJoinGameRequest((JoinGameRequest)data, clientID);
                     break;
                 case DataTypes.PlayersTurnData:
                     ProcessPlayerTurnData((PlayersTurnData) data, clientID);
                     break;
-                case DataTypes.StartGame:
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
             }
         }
 
-        private void ProcessGameData(object data, int clientID)
+        private void ProcessCreateGameRequest(CreateGameRequest request, int clientID)
         {
+            Console.WriteLine($"Request to create room {request.RoomID} from player {clientID}");
+
             Player player = players.FirstOrDefault(p => p.ID == clientID);
             if (player == null)
             {
                 Console.WriteLine($"Player {clientID} doesn't exist");
                 return;
             }
-            if (!player.IsInGame)
+            if (player.Match != null)
             {
-                Console.WriteLine($"Player {clientID} isn't in game");
+                Console.WriteLine($"Player {clientID} is already in the game");
+                Console.WriteLine($"Dropping room {player.Match.RoomID}");
+
+                if (player.Match.Player1 != null) player.Match.Player1.Match = null;
+                if (player.Match.Player2 != null) player.Match.Player2.Match = null;
+                matches.Remove(player.Match);
+            }
+            if (string.IsNullOrWhiteSpace(request.RoomID))
+            {
+                Console.WriteLine($"Room ID can't be empty");
                 return;
             }
 
-            GameMatch match = matches.FirstOrDefault(m => m.Player1 == player);
+            GameMatch match = new GameMatch();
+            match.Player1 = player;
+            match.RoomID = request.RoomID;
+            match.CardPackName = request.CardPack;
+            match.Width = request.Width;
+            match.Height = request.Height;
+
+            match.IsRunning = false;
+            player.Match = match;
+
+            matches.Add(match);
+
+            Console.WriteLine($"Room {request.RoomID} created");
+        }
+
+        private void ProcessJoinGameRequest(JoinGameRequest request, int clientID)
+        {
+            Console.WriteLine($"Request to join room {request.RoomID} from player {clientID}");
+
+            Player player = players.FirstOrDefault(p => p.ID == clientID);
+            if (player == null)
+            {
+                Console.WriteLine($"Player {clientID} doesn't exist");
+                return;
+            }
+            if (player.Match != null)
+            {
+                Console.WriteLine($"Player {clientID} is already in the game");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(request.RoomID))
+            {
+                Console.WriteLine($"Room ID can't be empty");
+                return;
+            }
+
+            GameMatch match = matches.FirstOrDefault(m => m.RoomID == request.RoomID);
             if (match == null)
             {
-                Console.WriteLine($"Error finding players {clientID} match");
-                return;
-            }
-            if (match.IsInitialized)
-            {
-                Console.WriteLine($"Match already initialized");
+                Console.WriteLine($"Room {request.RoomID} doesn't exist");
                 return;
             }
 
-            match.IsInitialized = true;
+            match.Player2 = player;
+            match.IsRunning = true;
+            player.Match = match;
 
-            Server.SendDataToClient(match.Player2.ID, (int)DataTypes.GameData, data);
+            int[,] field = CreateField(match.Width, match.Height);
+            StartGameResponse response = new StartGameResponse();
+            response.CardPackName = match.CardPackName;
+            response.PlayerID = 0;
+            response.Field = field;
+            Server.SendDataToClient(1, (int)DataTypes.StartGameResponse, response);
+            response.PlayerID = 1;
+            Server.SendDataToClient(2, (int)DataTypes.StartGameResponse, response);
+
+            Console.WriteLine($"Player {clientID} successfully joined");
         }
 
         private void ProcessPlayerTurnData(PlayersTurnData data, int clientID)
@@ -142,21 +205,16 @@ namespace MatchServer
                 Console.WriteLine($"Player {clientID} doesn't exist");
                 return;
             }
-            if (!player.IsInGame)
+            if (player.Match == null)
             {
                 Console.WriteLine($"Player {clientID} isn't in game");
                 return;
             }
 
-            GameMatch match = matches.FirstOrDefault(m => m.Player1 == player || m.Player2 == player);
-            if (match == null)
+            GameMatch match = player.Match;
+            if (!match.IsRunning)
             {
-                Console.WriteLine($"Error finding players {clientID} match");
-                return;
-            }
-            if (!match.IsInitialized)
-            {
-                Console.WriteLine($"Match isn't initialized");
+                Console.WriteLine($"Match isn't running");
                 return;
             }
 
@@ -166,38 +224,28 @@ namespace MatchServer
                 Server.SendDataToClient(match.Player1.ID, (int)DataTypes.PlayersTurnData, data);
         }
 
-        private bool TryCreateMatch()
-        {
-            Player player1 = null;
+        #endregion
 
-            foreach (Player player in players.Where(p => !p.IsInGame))
+        private int[,] CreateField(int w, int h)
+        {
+            int[,] field = new int[h,w];
+            List<int> seed = new List<int>(w * h);
+            for (int i = 0; i < w * h; i++)
             {
-                if (player1 == null)
-                    player1 = player;
-                else
+                seed.Add(i);
+            }
+
+            seed.Shuffle();
+
+            for (int j = 0; j < h; j++)
+            {
+                for (int i = 0; i < w; i++)
                 {
-                    CreateMatch(player1, player);
-                    return true;
+                    field[j, i] = seed[j * w + i] / 2;
                 }
             }
 
-            return false;
-        }
-
-        private void CreateMatch(Player player1, Player player2)
-        {
-            player1.IsInGame = true;
-            player2.IsInGame = true;
-
-            GameMatch match = new GameMatch();
-            match.Player1 = player1;
-            match.Player2 = player2;
-
-            matches.Add(match);
-
-            Server.SendDataToClient(player1.ID, (int)DataTypes.StartGame, null);
-
-            Console.WriteLine($"Match between player {player1.ID} and player {player2.ID}");
+            return field;
         }
     }
 }

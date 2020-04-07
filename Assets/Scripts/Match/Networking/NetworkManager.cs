@@ -5,6 +5,7 @@ using NetworkShared.Data;
 using NetworkShared.Network;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Match.Networking
 {
@@ -40,6 +41,40 @@ namespace Assets.Scripts.Match.Networking
             DisconnectPlayer();
         }
 
+        public string CreateGame()
+        {
+            if (client == null || !client.IsConnected())
+                ConnectPlayer();
+
+            string id = Random.Range(0, 1000).ToString();
+            CreateGameRequest request = new CreateGameRequest();
+            request.RoomID = id;
+            request.CardPack = GameSettings.CardPackage.Name;
+            request.Width = GameSettings.CardPackage.MaxWidth;
+            request.Height = GameSettings.CardPackage.MaxHeight;
+
+            client.SendData((int)DataTypes.CreateGameRequest, request);
+
+            return id;
+        }
+
+        public void JoinGame(string id)
+        {
+            if (client == null || !client.IsConnected())
+                ConnectPlayer();
+
+            JoinGameRequest request = new JoinGameRequest();
+            request.RoomID = id;
+
+            client.SendData((int)DataTypes.JoinGameRequest, request);
+        }
+
+        public void ConnectIfNot()
+        {
+            if (client == null || !client.IsConnected())
+                ConnectPlayer();
+        }
+
         public void ConnectPlayer()
         {
             client = new Client(this);
@@ -56,18 +91,15 @@ namespace Assets.Scripts.Match.Networking
         {
             switch ((DataTypes)type)
             {
-                case DataTypes.StartGame:
-                    ThisPlayerID = 1;
-                    GameData newGameData = new GameData();
-                    newGameData.Field = GameManager.Instance.CardManager.GetFieldData();
-                    newGameData.CardPackName = GameSettings.CardPackage.Name;
-                    client.SendData((int)DataTypes.GameData, newGameData);
-                    break;
-                case DataTypes.GameData:
-                    GameData gameData = (GameData) data;
-                    GameSettings.CardPackage = CardPackages.Packages[gameData.CardPackName];
-                    GameSettings.FieldData = gameData.Field;
-                    GameSettings.IsFromData = true;
+                case DataTypes.StartGameResponse:
+                    StartGameResponse response = (StartGameResponse) data;
+
+                    GameSettings.PlayersCount = 2;
+                    GameSettings.IsOnline = true;
+                    GameSettings.PlayerID = response.PlayerID;
+                    GameSettings.CardPackage = CardPackages.Packages[response.CardPackName];
+                    GameSettings.FieldData = response.Field;
+
                     SceneManager.LoadScene("GameScene");
                     break;
                 case DataTypes.PlayersTurnData:

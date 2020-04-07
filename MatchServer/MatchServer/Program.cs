@@ -16,7 +16,7 @@ namespace MatchServer
 
             Server server = new Server();
             server.Listener = core;
-            server.Start(2, 26950);
+            server.Start(100, 26950);
 
             core.Server = server;
             

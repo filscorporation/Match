@@ -89,16 +89,16 @@ namespace Assets.Scripts.Match
 
             CardManager = new CardManager(this);
             FieldParams fieldParams = new FieldParams { Height = GameSettings.FieldHeight, Width = GameSettings.FieldWidth };
-            if (GameSettings.IsFromData)
+            
+            if (GameSettings.IsOnline)
             {
-                GameSettings.IsFromData = false;
+                NetworkManager.Instance.ConnectIfNot();
+
                 CardManager.InitializeField(fieldParams, GameSettings.CardPackage, GameSettings.FieldData);
-                NetworkManager.Instance.ThisPlayerID = 0;
+                NetworkManager.Instance.ThisPlayerID = GameSettings.PlayerID;
             }
             else
             {
-                if (GameSettings.IsOnline)
-                    NetworkManager.Instance.ConnectPlayer();
                 CardManager.InitializeField(fieldParams, GameSettings.CardPackage);
             }
 

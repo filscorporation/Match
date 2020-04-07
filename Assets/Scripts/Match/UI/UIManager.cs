@@ -60,5 +60,15 @@ namespace Assets.Scripts.Match.UI
         {
             Buttons[button].gameObject.SetActive(false);
         }
+
+        /// <summary>
+        /// Sets button interactable by name
+        /// </summary>
+        /// <param name="button"></param>
+        /// <param name="interactable"></param>
+        protected void SetInteractable(string button, bool interactable)
+        {
+            Buttons[button].interactable = interactable;
+        }
     }
 }

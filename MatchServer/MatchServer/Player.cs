@@ -4,7 +4,7 @@
     {
         public int ID;
 
-        public bool IsInGame = false;
+        public GameMatch Match;
 
         public Player(int id)
         {

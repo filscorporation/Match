@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Match.CardManagement;
+using Assets.Scripts.Match.Networking;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -15,11 +18,17 @@ namespace Assets.Scripts.Match.UI
         private const string twoPlayerButton = "TwoPlayerButton";
         private const string threePlayerButton = "ThreePlayerButton";
         private const string fourPlayerButton = "FourPlayerButton";
-        private const string onlineButton = "OnlineButton";
 
         private const string kitchenCardPackButton = "KitchenCardPackButton";
         private const string artCardPackButton = "ArtCardPackButton";
         private const string oceanCardPackButton = "OceanCardPackButton";
+
+        private const string onlineButton = "OnlineButton";
+        private const string createButton = "CreateButton";
+        private const string joinButton = "JoinButton";
+        private const string onlineMenuPanelName = "OnlineMenuPanel";
+        private const string idTextBoxName = "IDTextBox";
+        private const string idTextBoxPlaceholderName = "IDTextBoxPlaceholder";
 
         private readonly CardPack kitchenCardPackage = CardPackages.Packages["KitchenPack"];
         private readonly CardPack artCardPackage = CardPackages.Packages["ArtPack"];
@@ -28,6 +37,10 @@ namespace Assets.Scripts.Match.UI
         private OptionsButtonsManager<CardPack> cardPacksButtons;
         private OptionsButtonsManager<int> playersCountButtons;
 
+        private GameObject onlineMenuPanel;
+        private InputField idTextBox;
+        private Text idTextBoxPlaceholder;
+
         protected override Dictionary<string, Button> Buttons { get; set; } = new Dictionary<string, Button>
         {
             { playButton, null },
@@ -35,10 +48,12 @@ namespace Assets.Scripts.Match.UI
             { twoPlayerButton, null },
             { threePlayerButton, null },
             { fourPlayerButton, null },
-            { onlineButton, null },
             { kitchenCardPackButton, null },
             { artCardPackButton, null },
             { oceanCardPackButton, null },
+            { onlineButton, null },
+            { createButton, null },
+            { joinButton, null },
         };
 
         protected override void WarmUp()
@@ -50,14 +65,20 @@ namespace Assets.Scripts.Match.UI
             pcbs.Add(new ButtonWrapper<int>(Buttons[twoPlayerButton], 2));
             pcbs.Add(new ButtonWrapper<int>(Buttons[threePlayerButton], 3));
             pcbs.Add(new ButtonWrapper<int>(Buttons[fourPlayerButton], 4));
-            pcbs.Add(new ButtonWrapper<int>(Buttons[onlineButton], 0));
-            playersCountButtons = new OptionsButtonsManager<int>(pcbs, GameSettings.IsOnline ? 0 : GameSettings.PlayersCount);
+            playersCountButtons = new OptionsButtonsManager<int>(pcbs, GameSettings.PlayersCount);
 
             List<ButtonWrapper<CardPack>> cpbs = new List<ButtonWrapper<CardPack>>();
             cpbs.Add(new ButtonWrapper<CardPack>(Buttons[kitchenCardPackButton], kitchenCardPackage));
             cpbs.Add(new ButtonWrapper<CardPack>(Buttons[artCardPackButton], artCardPackage));
             cpbs.Add(new ButtonWrapper<CardPack>(Buttons[oceanCardPackButton], oceanCardPackage));
             cardPacksButtons = new OptionsButtonsManager<CardPack>(cpbs, GameSettings.CardPackage);
+
+            onlineMenuPanel = Resources.FindObjectsOfTypeAll<Image>()
+                .FirstOrDefault(o => o.name == onlineMenuPanelName)?.gameObject;
+            idTextBox = Resources.FindObjectsOfTypeAll<InputField>()
+                .FirstOrDefault(o => o.name == idTextBoxName);
+            idTextBoxPlaceholder = Resources.FindObjectsOfTypeAll<Text>()
+                .FirstOrDefault(o => o.name == idTextBoxPlaceholderName);
         }
 
         private void SetDefaultCardPackage()
@@ -70,6 +91,8 @@ namespace Assets.Scripts.Match.UI
             }
         }
 
+        #region Base Menu Buttons
+
         public void PlayButtonClick()
         {
             SceneManager.LoadScene(gameSceneName);
@@ -78,36 +101,25 @@ namespace Assets.Scripts.Match.UI
         public void SinglePlayerButtonClick()
         {
             GameSettings.PlayersCount = 1;
-            GameSettings.IsOnline = false;
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
         }
 
         public void TwoPlayerButtonClick()
         {
             GameSettings.PlayersCount = 2;
-            GameSettings.IsOnline = false;
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
         }
 
         public void ThreePlayerButtonClick()
         {
             GameSettings.PlayersCount = 3;
-            GameSettings.IsOnline = false;
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
         }
 
         public void FourPlayerButtonClick()
         {
             GameSettings.PlayersCount = 4;
-            GameSettings.IsOnline = false;
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
-        }
-
-        public void OnlineButtonClick()
-        {
-            GameSettings.PlayersCount = 2;
-            GameSettings.IsOnline = true;
-            playersCountButtons.SelectOption(0);
         }
 
         public void KitchenCardPackButtonClick()
@@ -133,5 +145,69 @@ namespace Assets.Scripts.Match.UI
             GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
             cardPacksButtons.SelectOption(GameSettings.CardPackage);
         }
+
+        #endregion
+
+        #region Online Menu Buttons
+
+        public void OnlineButtonClick()
+        {
+            NetworkManager.Instance.ConnectIfNot();
+
+            idTextBox.readOnly = true;
+            idTextBox.text = string.Empty;
+            idTextBoxPlaceholder.text = string.Empty;
+            onlineMenuPanel.SetActive(true);
+            idTextBox.gameObject.SetActive(false);
+        }
+
+        public void CreateButtonClick()
+        {
+            SetInteractable(joinButton, false);
+            SetInteractable(createButton, false);
+
+            idTextBox.gameObject.SetActive(true);
+            string id = NetworkManager.Instance.CreateGame();
+            idTextBox.text = id;
+            idTextBox.readOnly = true;
+            idTextBoxPlaceholder.text = string.Empty;
+
+            Invoke(nameof(UnlockCreateJoinButtons), 3F);
+        }
+
+        private void UnlockCreateJoinButtons()
+        {
+            SetInteractable(createButton, true);
+            SetInteractable(joinButton, true);
+        }
+
+        public void JoinButtonClick()
+        {
+            if (string.IsNullOrEmpty(idTextBox.text))
+            {
+                SetInteractable(createButton, false);
+                idTextBoxPlaceholder.text = "Enter room number";
+                idTextBox.readOnly = false;
+                idTextBox.gameObject.SetActive(true);
+
+                return;
+            }
+
+            SetInteractable(createButton, false);
+            SetInteractable(joinButton, false);
+            NetworkManager.Instance.JoinGame(idTextBox.text);
+
+            Invoke(nameof(UnlockCreateJoinButtons), 3F);
+        }
+
+        public void BackButtonClick()
+        {
+            onlineMenuPanel.SetActive(false);
+            idTextBox.readOnly = true;
+            idTextBox.text = string.Empty;
+            idTextBoxPlaceholder.text = string.Empty;
+        }
+
+        #endregion
     }
 }

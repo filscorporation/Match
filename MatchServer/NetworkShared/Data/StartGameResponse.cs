@@ -3,8 +3,10 @@
 namespace NetworkShared.Data
 {
     [Serializable]
-    public class GameData
+    public class StartGameResponse
     {
+        public int PlayerID;
+
         public int[,] Field;
 
         public string CardPackName;

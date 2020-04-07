@@ -11,7 +11,6 @@ namespace Assets.Scripts.Match.Networking
     {
         public string IP = "192.168.0.14";
         public int Port = 26950;
-        private int myId = 0;
         public TCPConnection ClientTCP;
         public NetworkManager Manager;
 
@@ -29,6 +28,11 @@ namespace Assets.Scripts.Match.Networking
         public void Disconnect()
         {
             ClientTCP.Disconnect();
+        }
+
+        public bool IsConnected()
+        {
+            return ClientTCP?.Socket != null;
         }
 
         public void SendData(int type, object data)
