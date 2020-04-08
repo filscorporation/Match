@@ -18,7 +18,7 @@
 
         public bool ContainsPlayer(int id)
         {
-            return Player1 != null && Player1.ID == id || Player2 != null && Player2.ID == id;
+            return Player1 != null && Player1.ClientID == id || Player2 != null && Player2.ClientID == id;
         }
     }
 }

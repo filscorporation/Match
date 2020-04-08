@@ -69,6 +69,16 @@ namespace Assets.Scripts.Match.Networking
             client.SendData((int)DataTypes.JoinGameRequest, request);
         }
 
+        public void RestartGame()
+        {
+            if (client == null || !client.IsConnected())
+                ConnectPlayer();
+
+            RestartGameRequest request = new RestartGameRequest();
+
+            client.SendData((int)DataTypes.RestartGameRequest, request);
+        }
+
         public void ConnectIfNot()
         {
             if (client == null || !client.IsConnected())
@@ -98,6 +108,8 @@ namespace Assets.Scripts.Match.Networking
                     GameSettings.IsOnline = true;
                     GameSettings.PlayerID = response.PlayerID;
                     GameSettings.CardPackage = CardPackages.Packages[response.CardPackName];
+                    GameSettings.FieldHeight = response.Field.GetLength(0);
+                    GameSettings.FieldWidth = response.Field.GetLength(1);
                     GameSettings.FieldData = response.Field;
 
                     SceneManager.LoadScene("GameScene");
@@ -113,11 +125,6 @@ namespace Assets.Scripts.Match.Networking
         public void SendPlayersTurn(PlayersTurnData playersTurnData)
         {
             client.SendData((int)DataTypes.PlayersTurnData, playersTurnData);
-        }
-
-        public static void Log(string msg)
-        {
-            Debug.Log(msg);
         }
     }
 }

@@ -162,7 +162,14 @@ namespace Assets.Scripts.Match.UI
 
         public void RestartButtonClick()
         {
-            SceneManager.LoadScene(gameSceneName);
+            if (GameSettings.IsOnline)
+            {
+                NetworkManager.Instance.RestartGame();
+            }
+            else
+            {
+                SceneManager.LoadScene(gameSceneName);
+            }
         }
     }
 }
