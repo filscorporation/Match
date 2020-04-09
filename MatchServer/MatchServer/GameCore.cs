@@ -76,10 +76,7 @@ namespace MatchServer
             GameMatch match = matches.FirstOrDefault(m => m.ContainsPlayer(clientID));
             if (match != null)
             {
-                Console.WriteLine($"Dropping room {match.RoomID}");
-                if (match.Player1 != null) match.Player1.Match = null;
-                if (match.Player2 != null) match.Player2.Match = null;
-                matches.Remove(match);
+                DropRoom(match);
             }
 
             if (players.RemoveAll(p => p.ClientID == clientID) == 0)
@@ -89,6 +86,19 @@ namespace MatchServer
             }
 
             Console.WriteLine($"Removing player {clientID} from the game");
+        }
+
+        #endregion
+
+        #region Rooms
+
+        private void DropRoom(GameMatch match)
+        {
+            Console.WriteLine($"Dropping room {match.RoomID}");
+
+            if (match.Player1 != null) match.Player1.Match = null;
+            if (match.Player2 != null) match.Player2.Match = null;
+            matches.Remove(match);
         }
 
         #endregion
@@ -126,7 +136,7 @@ namespace MatchServer
 
         private void ProcessCreateGameRequest(CreateGameRequest request, int clientID)
         {
-            Console.WriteLine($"Request to create room {request.RoomID} from player {clientID}");
+            Console.WriteLine($"Request to create room from player {clientID}");
 
             Player player = players.FirstOrDefault(p => p.ClientID == clientID);
             if (player == null)
@@ -138,22 +148,14 @@ namespace MatchServer
             {
                 Console.WriteLine($"Player {clientID} is already in the game");
 
-                Console.WriteLine($"Dropping room {player.Match.RoomID}");
-                GameMatch oldMatch = player.Match;
+                DropRoom(player.Match);
+            }
 
-                if (oldMatch.Player1 != null) oldMatch.Player1.Match = null;
-                if (oldMatch.Player2 != null) oldMatch.Player2.Match = null;
-                matches.Remove(oldMatch);
-            }
-            if (string.IsNullOrWhiteSpace(request.RoomID))
-            {
-                Console.WriteLine($"Room ID can't be empty");
-                return;
-            }
+            string roomID = GetNewRoomNumber().ToString();
 
             GameMatch match = new GameMatch();
             match.Player1 = player;
-            match.RoomID = request.RoomID;
+            match.RoomID = roomID;
             match.CardPackName = request.CardPack;
             match.Width = request.Width;
             match.Height = request.Height;
@@ -163,7 +165,11 @@ namespace MatchServer
 
             matches.Add(match);
 
-            Console.WriteLine($"Room {request.RoomID} created");
+            Console.WriteLine($"Room {roomID} created");
+
+            CreateGameResponse response = new CreateGameResponse();
+            response.RoomID = roomID;
+            Server.SendDataToClient(clientID, (int)DataTypes.CreateGameResponse, response);
         }
 
         private void ProcessJoinGameRequest(JoinGameRequest request, int clientID)
@@ -178,8 +184,11 @@ namespace MatchServer
             }
             if (player.Match != null)
             {
-                Console.WriteLine($"Player {clientID} is already in the game");
-                return;
+                if (player.Match.IsRunning)
+                {
+                    Console.WriteLine($"Player {clientID} is already in the game");
+                    return;
+                }
             }
             if (string.IsNullOrWhiteSpace(request.RoomID))
             {
@@ -192,6 +201,16 @@ namespace MatchServer
             {
                 Console.WriteLine($"Room {request.RoomID} doesn't exist");
                 return;
+            }
+            if (player.Match != null)
+            {
+                if (match == player.Match)
+                {
+                    Console.WriteLine($"Player {player.ClientID} trying to join same room {match.RoomID}");
+                    return;
+                }
+
+                DropRoom(player.Match);
             }
 
             match.Player2 = player;
@@ -274,6 +293,14 @@ namespace MatchServer
 
         #endregion
 
+        #region Game Management
+
+        private int GetNewRoomNumber()
+        {
+            Random random = new Random();
+            return random.Next(1, 1000);
+        }
+
         private int[,] CreateField(int w, int h)
         {
             int[,] field = new int[h,w];
@@ -295,5 +322,7 @@ namespace MatchServer
 
             return field;
         }
+
+        #endregion
     }
 }

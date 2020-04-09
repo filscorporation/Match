@@ -29,7 +29,8 @@ namespace Assets.Scripts.Match.CardManagement
         private const float portraitScaleFactor = 0.9F;
 
         private bool isAnimating = false;
-        private const float cardAnimationLength = 0.6F; public AudioClip AudioClip;
+        private const float cardAnimationLength = 0.6F;
+        public AudioClip AudioClip;
 
         private const string soundFolderName = "Sounds";
         private AudioSource audioSource;

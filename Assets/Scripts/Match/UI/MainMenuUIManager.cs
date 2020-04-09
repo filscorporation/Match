@@ -13,6 +13,20 @@ namespace Assets.Scripts.Match.UI
     /// </summary>
     public class MainMenuUIManager : UIManager
     {
+        private static MainMenuUIManager instance;
+
+        public static MainMenuUIManager Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = FindObjectOfType<MainMenuUIManager>();
+                }
+                return instance;
+            }
+        }
+
         private const string playButton = "PlayButton";
         private const string singlePlayerButton = "SinglePlayerButton";
         private const string twoPlayerButton = "TwoPlayerButton";
@@ -159,6 +173,8 @@ namespace Assets.Scripts.Match.UI
             idTextBoxPlaceholder.text = string.Empty;
             onlineMenuPanel.SetActive(true);
             idTextBox.gameObject.SetActive(false);
+            SetInteractable(createButton, true);
+            SetInteractable(joinButton, true);
         }
 
         public void CreateButtonClick()
@@ -167,18 +183,16 @@ namespace Assets.Scripts.Match.UI
             SetInteractable(createButton, false);
 
             idTextBox.gameObject.SetActive(true);
-            string id = NetworkManager.Instance.CreateGame();
-            idTextBox.text = id;
+            NetworkManager.Instance.CreateGame();
             idTextBox.readOnly = true;
-            idTextBoxPlaceholder.text = string.Empty;
-
-            Invoke(nameof(UnlockCreateJoinButtons), 3F);
+            idTextBoxPlaceholder.text = "Creating..";
         }
 
-        private void UnlockCreateJoinButtons()
+        public void RoomCreated(string roomID)
         {
-            SetInteractable(createButton, true);
-            SetInteractable(joinButton, true);
+            idTextBox.text = roomID;
+            idTextBox.readOnly = true;
+            idTextBoxPlaceholder.text = string.Empty;
         }
 
         public void JoinButtonClick()
@@ -197,7 +211,14 @@ namespace Assets.Scripts.Match.UI
             SetInteractable(joinButton, false);
             NetworkManager.Instance.JoinGame(idTextBox.text);
 
+            CancelInvoke(nameof(UnlockCreateJoinButtons));
             Invoke(nameof(UnlockCreateJoinButtons), 3F);
+        }
+
+        private void UnlockCreateJoinButtons()
+        {
+            SetInteractable(createButton, true);
+            SetInteractable(joinButton, true);
         }
 
         public void BackButtonClick()

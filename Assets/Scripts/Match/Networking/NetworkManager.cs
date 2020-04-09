@@ -1,5 +1,6 @@
 ﻿using System;
 using Assets.Scripts.Match.CardManagement;
+using Assets.Scripts.Match.UI;
 using NetworkShared.Core;
 using NetworkShared.Data;
 using NetworkShared.Network;
@@ -41,21 +42,18 @@ namespace Assets.Scripts.Match.Networking
             DisconnectPlayer();
         }
 
-        public string CreateGame()
+        public void CreateGame()
         {
             if (client == null || !client.IsConnected())
                 ConnectPlayer();
 
             string id = Random.Range(0, 1000).ToString();
             CreateGameRequest request = new CreateGameRequest();
-            request.RoomID = id;
             request.CardPack = GameSettings.CardPackage.Name;
             request.Width = GameSettings.CardPackage.MaxWidth;
             request.Height = GameSettings.CardPackage.MaxHeight;
 
             client.SendData((int)DataTypes.CreateGameRequest, request);
-
-            return id;
         }
 
         public void JoinGame(string id)
@@ -102,21 +100,29 @@ namespace Assets.Scripts.Match.Networking
             switch ((DataTypes)type)
             {
                 case DataTypes.StartGameResponse:
-                    StartGameResponse response = (StartGameResponse) data;
+                    StartGameResponse startGameResponse = (StartGameResponse) data;
 
                     GameSettings.PlayersCount = 2;
                     GameSettings.IsOnline = true;
-                    GameSettings.PlayerID = response.PlayerID;
-                    GameSettings.CardPackage = CardPackages.Packages[response.CardPackName];
-                    GameSettings.FieldHeight = response.Field.GetLength(0);
-                    GameSettings.FieldWidth = response.Field.GetLength(1);
-                    GameSettings.FieldData = response.Field;
+                    GameSettings.PlayerID = startGameResponse.PlayerID;
+                    GameSettings.CardPackage = CardPackages.Packages[startGameResponse.CardPackName];
+                    GameSettings.FieldHeight = startGameResponse.Field.GetLength(0);
+                    GameSettings.FieldWidth = startGameResponse.Field.GetLength(1);
+                    GameSettings.FieldData = startGameResponse.Field;
 
                     SceneManager.LoadScene("GameScene");
                     break;
                 case DataTypes.PlayersTurnData:
                     GameManager.Instance.CardManager.Handle((PlayersTurnData)data);
                     break;
+                case DataTypes.CreateGameResponse:
+                    CreateGameResponse createGameResponse = (CreateGameResponse)data;
+
+                    MainMenuUIManager.Instance.RoomCreated(createGameResponse.RoomID);
+                    break;
+                case DataTypes.CreateGameRequest:
+                case DataTypes.JoinGameRequest:
+                case DataTypes.RestartGameRequest:
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
