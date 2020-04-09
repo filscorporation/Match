@@ -42,13 +42,13 @@ namespace Assets.Scripts.Match.Networking
             DisconnectPlayer();
         }
 
-        public void CreateGame()
+        public void CreateGame(string playerName)
         {
             if (client == null || !client.IsConnected())
                 ConnectPlayer();
 
-            string id = Random.Range(0, 1000).ToString();
             CreateGameRequest request = new CreateGameRequest();
+            request.PlayerName = playerName;
             request.CardPack = GameSettings.CardPackage.Name;
             request.Width = GameSettings.CardPackage.MaxWidth;
             request.Height = GameSettings.CardPackage.MaxHeight;
@@ -56,13 +56,14 @@ namespace Assets.Scripts.Match.Networking
             client.SendData((int)DataTypes.CreateGameRequest, request);
         }
 
-        public void JoinGame(string id)
+        public void JoinGame(string roomID, string playerName)
         {
             if (client == null || !client.IsConnected())
                 ConnectPlayer();
 
             JoinGameRequest request = new JoinGameRequest();
-            request.RoomID = id;
+            request.PlayerName = playerName;
+            request.RoomID = roomID;
 
             client.SendData((int)DataTypes.JoinGameRequest, request);
         }
@@ -109,6 +110,7 @@ namespace Assets.Scripts.Match.Networking
                     GameSettings.FieldHeight = startGameResponse.Field.GetLength(0);
                     GameSettings.FieldWidth = startGameResponse.Field.GetLength(1);
                     GameSettings.FieldData = startGameResponse.Field;
+                    GameSettings.PlayersNames = startGameResponse.PlayersNames;
 
                     SceneManager.LoadScene("GameScene");
                     break;

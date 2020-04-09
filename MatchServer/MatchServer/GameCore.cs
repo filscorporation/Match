@@ -153,6 +153,8 @@ namespace MatchServer
 
             string roomID = GetNewRoomNumber().ToString();
 
+            player.Name = request.PlayerName;
+
             GameMatch match = new GameMatch();
             match.Player1 = player;
             match.RoomID = roomID;
@@ -213,20 +215,26 @@ namespace MatchServer
                 DropRoom(player.Match);
             }
 
+            player.Name = request.PlayerName;
+
             match.Player2 = player;
             match.IsRunning = true;
             player.Match = match;
 
+            Console.WriteLine($"Player {clientID} successfully joined");
+
             int[,] field = CreateField(match.Width, match.Height);
             StartGameResponse response = new StartGameResponse();
             response.CardPackName = match.CardPackName;
-            response.PlayerID = 0;
             response.Field = field;
+            response.PlayersNames = match.GetPlayersNames();
+
+            response.PlayerID = 0;
             Server.SendDataToClient(match.Player1.ClientID, (int)DataTypes.StartGameResponse, response);
             response.PlayerID = 1;
             Server.SendDataToClient(match.Player2.ClientID, (int)DataTypes.StartGameResponse, response);
 
-            Console.WriteLine($"Player {clientID} successfully joined");
+            Console.WriteLine($"Match {match.RoomID} started");
         }
 
         private void ProcessRestartGameRequest(RestartGameRequest request, int clientID)

@@ -34,7 +34,7 @@ namespace Assets.Scripts.Match
 
         private List<Player> players;
         private int activePlayer = 0;
-        private List<string> defaultPlayersNames = new List<string> //TODO: remove
+        public static List<string> DefaultPlayersNames = new List<string> //TODO: remove
         {
             "Player 1", "Player 2", "Player 3", "Player 4"
         };
@@ -115,7 +115,14 @@ namespace Assets.Scripts.Match
             activePlayer = 0;
             if (count > 4)
                 throw new NotImplementedException();
-            players = defaultPlayersNames.GetRange(0, count).Select(n => new Player { Name = n }).ToList();
+            if (GameSettings.PlayersNames?.Length > 0)
+            {
+                players = GameSettings.PlayersNames.ToList().GetRange(0, count).Select(n => new Player { Name = n }).ToList();
+            }
+            else
+            {
+                players = DefaultPlayersNames.GetRange(0, count).Select(n => new Player {Name = n}).ToList();
+            }
         }
 
         private void InitializePlayerStats()
