@@ -30,7 +30,8 @@ namespace Assets.Scripts.Match.CardManagement
         private const string backgroundFileName = "Background";
 
         private bool isAnimating = false;
-        private const float cardAnimationLength = 0.6F; public AudioClip AudioClip;
+        private const float cardAnimationLength = 0.6F;
+        public AudioClip AudioClip;
 
         private const string soundFolderName = "Sounds";
         private AudioSource audioSource;

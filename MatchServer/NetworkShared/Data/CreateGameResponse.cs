@@ -3,10 +3,8 @@
 namespace NetworkShared.Data
 {
     [Serializable]
-    public class JoinGameRequest
+    public class CreateGameResponse
     {
-        public string PlayerName;
-
         public string RoomID;
     }
 }

@@ -5,6 +5,8 @@ namespace NetworkShared.Data
     [Serializable]
     public class StartGameResponse
     {
+        public string[] PlayersNames;
+
         public int PlayerID;
 
         public int[,] Field;
