@@ -27,6 +27,7 @@ namespace Assets.Scripts.Match.CardManagement
         private const string cardsFolder = "Cards";
         private const string cardbackFileName = "CardBack";
         private const float portraitScaleFactor = 0.9F;
+        private const string backgroundFileName = "Background";
 
         private bool isAnimating = false;
         private const float cardAnimationLength = 0.6F; public AudioClip AudioClip;
@@ -35,6 +36,8 @@ namespace Assets.Scripts.Match.CardManagement
         private AudioSource audioSource;
         private const string cardFlipSoundName = "CardFlipSound";
         private AudioClip cardFlipSound;
+
+        private const string backgroundObjectName = "Background";
 
         public CardManager(GameManager gameManager)
         {
@@ -54,6 +57,9 @@ namespace Assets.Scripts.Match.CardManagement
             try
             {
                 ClearField();
+
+                SetBackground(cardPack.Name);
+
                 cards = new Card[prs.Height][];
                 cardPrefabs = GetCardPrefabs(cardPack.Name, out Vector2 cardSize);
                 if (cardPrefabs.Count < prs.Width * prs.Height / 2)
@@ -233,6 +239,25 @@ namespace Assets.Scripts.Match.CardManagement
                     lastActive = null;
                 }
             }
+        }
+
+        private void SetBackground(string cardPackName)
+        {
+            GameObject backgroundObject = GameObject.Find(backgroundObjectName);
+            Sprite backgroundSprite = Resources.Load<Sprite>(Path.Combine(cardPacksFolder, cardPackName, backgroundFileName));
+            SpriteRenderer sr = backgroundObject.GetComponent<SpriteRenderer>();
+            sr.sprite = backgroundSprite;
+
+            backgroundObject.transform.localScale = new Vector3(1, 1, 1);
+
+            float width = sr.sprite.bounds.size.x;
+            float height = sr.sprite.bounds.size.y;
+
+            float worldScreenHeight = Camera.main.orthographicSize * 2.0F;
+            float worldScreenWidth = worldScreenHeight / Screen.height * Screen.width;
+            float scale = Math.Max(worldScreenWidth / width, worldScreenHeight / height);
+
+            backgroundObject.transform.localScale = new Vector2(scale, scale);
         }
 
         private void PrepareSound()
