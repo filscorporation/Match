@@ -43,6 +43,10 @@ ExportedObj/
 *.opendb
 *.VC.db
 
+# Include sln and proj for Server
+!/MatchServer/*.sln
+!/MatchServer/*/*.csproj
+
 # Unity3D generated meta files
 *.pidb.meta
 *.pdb.meta
@@ -62,3 +66,5 @@ crashlytics-build.properties
 /MatchServer/MatchServer/bin/Debug/netcoreapp3.1
 /MatchServer/NetworkShared/obj
 /MatchServer/NetworkShared/bin/Debug/netstandard2.0
+/MatchServer/MatchServer/bin/Debug
+/MatchServer/NetworkShared/bin/Debug

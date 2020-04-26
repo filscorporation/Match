@@ -2,13 +2,15 @@
 {
     public class Player
     {
-        public int ID;
+        public string Name;
+
+        public int ClientID;
 
         public GameMatch Match;
 
-        public Player(int id)
+        public Player(int clientID)
         {
-            ID = id;
+            ClientID = clientID;
         }
     }
 }

@@ -5,7 +5,7 @@ namespace NetworkShared.Data
     [Serializable]
     public class CreateGameRequest
     {
-        public string RoomID;
+        public string PlayerName;
 
         public string CardPack;
 

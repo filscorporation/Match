@@ -6,6 +6,8 @@ namespace Assets.Scripts.Match
     [Serializable]
     public static class GameSettings
     {
+        public static string[] PlayersNames;
+
         public static int FieldWidth;
 
         public static int FieldHeight;

@@ -72,9 +72,10 @@ namespace Assets.Scripts.Match.UI
                     throw new NotSupportedException("Too much players");
                 playersTexts = new Dictionary<string, Text>();
                 Text[] elements = Resources.FindObjectsOfTypeAll<Text>();
-                foreach (Player player in players)
+                for (int index = 0; index < players.Count; index++)
                 {
-                    Text text = elements.First(t => t.gameObject.name == player.Name + " Text");
+                    Player player = players[index];
+                    Text text = elements.First(t => t.gameObject.name == GameManager.DefaultPlayersNames[index] + " Text");
                     text.gameObject.SetActive(true);
                     playersTexts.Add(player.Name, text);
                 }
@@ -162,7 +163,14 @@ namespace Assets.Scripts.Match.UI
 
         public void RestartButtonClick()
         {
-            SceneManager.LoadScene(gameSceneName);
+            if (GameSettings.IsOnline)
+            {
+                NetworkManager.Instance.RestartGame();
+            }
+            else
+            {
+                SceneManager.LoadScene(gameSceneName);
+            }
         }
     }
 }

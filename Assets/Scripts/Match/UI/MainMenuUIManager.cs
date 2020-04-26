@@ -13,6 +13,20 @@ namespace Assets.Scripts.Match.UI
     /// </summary>
     public class MainMenuUIManager : UIManager
     {
+        private static MainMenuUIManager instance;
+
+        public static MainMenuUIManager Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = FindObjectOfType<MainMenuUIManager>();
+                }
+                return instance;
+            }
+        }
+
         private const string playButton = "PlayButton";
         private const string singlePlayerButton = "SinglePlayerButton";
         private const string twoPlayerButton = "TwoPlayerButton";
@@ -29,6 +43,10 @@ namespace Assets.Scripts.Match.UI
         private const string onlineMenuPanelName = "OnlineMenuPanel";
         private const string idTextBoxName = "IDTextBox";
         private const string idTextBoxPlaceholderName = "IDTextBoxPlaceholder";
+        private const string playerNameTextBoxName = "PlayerNameTextBox";
+
+        private const string defaultPlayerName = "Player";
+        private const string playerNamePlayerPref = "PlayerName";
 
         private readonly CardPack kitchenCardPackage = CardPackages.Packages["KitchenPack"];
         private readonly CardPack artCardPackage = CardPackages.Packages["ArtPack"];
@@ -40,6 +58,7 @@ namespace Assets.Scripts.Match.UI
         private GameObject onlineMenuPanel;
         private InputField idTextBox;
         private Text idTextBoxPlaceholder;
+        private InputField playerNameTextBox;
 
         protected override Dictionary<string, Button> Buttons { get; set; } = new Dictionary<string, Button>
         {
@@ -79,6 +98,10 @@ namespace Assets.Scripts.Match.UI
                 .FirstOrDefault(o => o.name == idTextBoxName);
             idTextBoxPlaceholder = Resources.FindObjectsOfTypeAll<Text>()
                 .FirstOrDefault(o => o.name == idTextBoxPlaceholderName);
+            playerNameTextBox = Resources.FindObjectsOfTypeAll<InputField>()
+                .FirstOrDefault(o => o.name == playerNameTextBoxName);
+
+            playerNameTextBox.text = GetPlayerName();
         }
 
         private void SetDefaultCardPackage()
@@ -159,6 +182,8 @@ namespace Assets.Scripts.Match.UI
             idTextBoxPlaceholder.text = string.Empty;
             onlineMenuPanel.SetActive(true);
             idTextBox.gameObject.SetActive(false);
+            SetInteractable(createButton, true);
+            SetInteractable(joinButton, true);
         }
 
         public void CreateButtonClick()
@@ -167,18 +192,16 @@ namespace Assets.Scripts.Match.UI
             SetInteractable(createButton, false);
 
             idTextBox.gameObject.SetActive(true);
-            string id = NetworkManager.Instance.CreateGame();
-            idTextBox.text = id;
+            NetworkManager.Instance.CreateGame(GetPlayerName());
             idTextBox.readOnly = true;
-            idTextBoxPlaceholder.text = string.Empty;
-
-            Invoke(nameof(UnlockCreateJoinButtons), 3F);
+            idTextBoxPlaceholder.text = "Creating..";
         }
 
-        private void UnlockCreateJoinButtons()
+        public void RoomCreated(string roomID)
         {
-            SetInteractable(createButton, true);
-            SetInteractable(joinButton, true);
+            idTextBox.text = roomID;
+            idTextBox.readOnly = true;
+            idTextBoxPlaceholder.text = string.Empty;
         }
 
         public void JoinButtonClick()
@@ -195,9 +218,16 @@ namespace Assets.Scripts.Match.UI
 
             SetInteractable(createButton, false);
             SetInteractable(joinButton, false);
-            NetworkManager.Instance.JoinGame(idTextBox.text);
+            NetworkManager.Instance.JoinGame(idTextBox.text, GetPlayerName());
 
+            CancelInvoke(nameof(UnlockCreateJoinButtons));
             Invoke(nameof(UnlockCreateJoinButtons), 3F);
+        }
+
+        private void UnlockCreateJoinButtons()
+        {
+            SetInteractable(createButton, true);
+            SetInteractable(joinButton, true);
         }
 
         public void BackButtonClick()
@@ -206,6 +236,32 @@ namespace Assets.Scripts.Match.UI
             idTextBox.readOnly = true;
             idTextBox.text = string.Empty;
             idTextBoxPlaceholder.text = string.Empty;
+        }
+
+        public void OnPlayerNameChanged()
+        {
+            if (string.IsNullOrWhiteSpace(playerNameTextBox.text))
+            {
+                playerNameTextBox.text = defaultPlayerName;
+                return;
+            }
+
+            SetPlayerName(playerNameTextBox.text);
+        }
+
+        private void SetPlayerName(string playerName)
+        {
+            PlayerPrefs.SetString(playerNamePlayerPref, playerName);
+        }
+
+        private string GetPlayerName()
+        {
+            string savedName = PlayerPrefs.GetString(playerNamePlayerPref);
+
+            if (!string.IsNullOrWhiteSpace(savedName))
+                return savedName;
+
+            return defaultPlayerName;
         }
 
         #endregion

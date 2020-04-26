@@ -61,7 +61,7 @@ namespace MatchServer
 
         public void ClientConnected(int clientID)
         {
-            if (players.Any(p => p.ID == clientID))
+            if (players.Any(p => p.ClientID == clientID))
             {
                 Console.WriteLine($"Player {clientID} already exists");
                 return;
@@ -76,13 +76,10 @@ namespace MatchServer
             GameMatch match = matches.FirstOrDefault(m => m.ContainsPlayer(clientID));
             if (match != null)
             {
-                Console.WriteLine($"Dropping room {match.RoomID}");
-                if (match.Player1 != null) match.Player1.Match = null;
-                if (match.Player2 != null) match.Player2.Match = null;
-                matches.Remove(match);
+                DropRoom(match);
             }
 
-            if (players.RemoveAll(p => p.ID == clientID) == 0)
+            if (players.RemoveAll(p => p.ClientID == clientID) == 0)
             {
                 Console.WriteLine($"Player {clientID} doesn't exist");
                 return;
@@ -93,31 +90,55 @@ namespace MatchServer
 
         #endregion
 
+        #region Rooms
+
+        private void DropRoom(GameMatch match)
+        {
+            Console.WriteLine($"Dropping room {match.RoomID}");
+
+            if (match.Player1 != null) match.Player1.Match = null;
+            if (match.Player2 != null) match.Player2.Match = null;
+            matches.Remove(match);
+        }
+
+        #endregion
+
         #region Data
 
         public void ClientSentData(int clientID, int dataType, object data)
         {
-            switch ((DataTypes)dataType)
+            try
             {
-                case DataTypes.CreateGameRequest:
-                    ProcessCreateGameRequest((CreateGameRequest) data, clientID);
-                    break;
-                case DataTypes.JoinGameRequest:
-                    ProcessJoinGameRequest((JoinGameRequest)data, clientID);
-                    break;
-                case DataTypes.PlayersTurnData:
-                    ProcessPlayerTurnData((PlayersTurnData) data, clientID);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
+                switch ((DataTypes)dataType)
+                {
+                    case DataTypes.CreateGameRequest:
+                        ProcessCreateGameRequest((CreateGameRequest)data, clientID);
+                        break;
+                    case DataTypes.JoinGameRequest:
+                        ProcessJoinGameRequest((JoinGameRequest)data, clientID);
+                        break;
+                    case DataTypes.PlayersTurnData:
+                        ProcessPlayerTurnData((PlayersTurnData)data, clientID);
+                        break;
+                    case DataTypes.RestartGameRequest:
+                        ProcessRestartGameRequest((RestartGameRequest)data, clientID);
+                        break;
+                    case DataTypes.StartGameResponse:
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error processing message from clint {clientID}:{e}");
             }
         }
 
         private void ProcessCreateGameRequest(CreateGameRequest request, int clientID)
         {
-            Console.WriteLine($"Request to create room {request.RoomID} from player {clientID}");
+            Console.WriteLine($"Request to create room from player {clientID}");
 
-            Player player = players.FirstOrDefault(p => p.ID == clientID);
+            Player player = players.FirstOrDefault(p => p.ClientID == clientID);
             if (player == null)
             {
                 Console.WriteLine($"Player {clientID} doesn't exist");
@@ -126,21 +147,17 @@ namespace MatchServer
             if (player.Match != null)
             {
                 Console.WriteLine($"Player {clientID} is already in the game");
-                Console.WriteLine($"Dropping room {player.Match.RoomID}");
 
-                if (player.Match.Player1 != null) player.Match.Player1.Match = null;
-                if (player.Match.Player2 != null) player.Match.Player2.Match = null;
-                matches.Remove(player.Match);
+                DropRoom(player.Match);
             }
-            if (string.IsNullOrWhiteSpace(request.RoomID))
-            {
-                Console.WriteLine($"Room ID can't be empty");
-                return;
-            }
+
+            string roomID = GetNewRoomNumber().ToString();
+
+            player.Name = request.PlayerName;
 
             GameMatch match = new GameMatch();
             match.Player1 = player;
-            match.RoomID = request.RoomID;
+            match.RoomID = roomID;
             match.CardPackName = request.CardPack;
             match.Width = request.Width;
             match.Height = request.Height;
@@ -150,14 +167,18 @@ namespace MatchServer
 
             matches.Add(match);
 
-            Console.WriteLine($"Room {request.RoomID} created");
+            Console.WriteLine($"Room {roomID} created");
+
+            CreateGameResponse response = new CreateGameResponse();
+            response.RoomID = roomID;
+            Server.SendDataToClient(clientID, (int)DataTypes.CreateGameResponse, response);
         }
 
         private void ProcessJoinGameRequest(JoinGameRequest request, int clientID)
         {
             Console.WriteLine($"Request to join room {request.RoomID} from player {clientID}");
 
-            Player player = players.FirstOrDefault(p => p.ID == clientID);
+            Player player = players.FirstOrDefault(p => p.ClientID == clientID);
             if (player == null)
             {
                 Console.WriteLine($"Player {clientID} doesn't exist");
@@ -165,8 +186,11 @@ namespace MatchServer
             }
             if (player.Match != null)
             {
-                Console.WriteLine($"Player {clientID} is already in the game");
-                return;
+                if (player.Match.IsRunning)
+                {
+                    Console.WriteLine($"Player {clientID} is already in the game");
+                    return;
+                }
             }
             if (string.IsNullOrWhiteSpace(request.RoomID))
             {
@@ -180,26 +204,77 @@ namespace MatchServer
                 Console.WriteLine($"Room {request.RoomID} doesn't exist");
                 return;
             }
+            if (player.Match != null)
+            {
+                if (match == player.Match)
+                {
+                    Console.WriteLine($"Player {player.ClientID} trying to join same room {match.RoomID}");
+                    return;
+                }
+
+                DropRoom(player.Match);
+            }
+
+            player.Name = request.PlayerName;
 
             match.Player2 = player;
             match.IsRunning = true;
             player.Match = match;
+
+            Console.WriteLine($"Player {clientID} successfully joined");
+
+            int[,] field = CreateField(match.Width, match.Height);
+            StartGameResponse response = new StartGameResponse();
+            response.CardPackName = match.CardPackName;
+            response.Field = field;
+            response.PlayersNames = match.GetPlayersNames();
+
+            response.PlayerID = 0;
+            Server.SendDataToClient(match.Player1.ClientID, (int)DataTypes.StartGameResponse, response);
+            response.PlayerID = 1;
+            Server.SendDataToClient(match.Player2.ClientID, (int)DataTypes.StartGameResponse, response);
+
+            Console.WriteLine($"Match {match.RoomID} started");
+        }
+
+        private void ProcessRestartGameRequest(RestartGameRequest request, int clientID)
+        {
+            Console.WriteLine($"Request to restart game from player {clientID}");
+
+            Player player = players.FirstOrDefault(p => p.ClientID == clientID);
+            if (player == null)
+            {
+                Console.WriteLine($"Player {clientID} doesn't exist");
+                return;
+            }
+            if (player.Match == null)
+            {
+                Console.WriteLine($"Player {clientID} is not in the game");
+                return;
+            }
+
+            GameMatch match = player.Match;
+            if (!match.IsRunning)
+            {
+                Console.WriteLine($"Match isn't running");
+                return;
+            }
 
             int[,] field = CreateField(match.Width, match.Height);
             StartGameResponse response = new StartGameResponse();
             response.CardPackName = match.CardPackName;
             response.PlayerID = 0;
             response.Field = field;
-            Server.SendDataToClient(1, (int)DataTypes.StartGameResponse, response);
+            Server.SendDataToClient(match.Player1.ClientID, (int)DataTypes.StartGameResponse, response);
             response.PlayerID = 1;
-            Server.SendDataToClient(2, (int)DataTypes.StartGameResponse, response);
+            Server.SendDataToClient(match.Player2.ClientID, (int)DataTypes.StartGameResponse, response);
 
             Console.WriteLine($"Player {clientID} successfully joined");
         }
 
         private void ProcessPlayerTurnData(PlayersTurnData data, int clientID)
         {
-            Player player = players.FirstOrDefault(p => p.ID == clientID);
+            Player player = players.FirstOrDefault(p => p.ClientID == clientID);
             if (player == null)
             {
                 Console.WriteLine($"Player {clientID} doesn't exist");
@@ -218,13 +293,21 @@ namespace MatchServer
                 return;
             }
 
-            if (clientID == 1)
-                Server.SendDataToClient(match.Player2.ID, (int)DataTypes.PlayersTurnData, data);
+            if (match.Player1 == player)
+                Server.SendDataToClient(match.Player2.ClientID, (int)DataTypes.PlayersTurnData, data);
             else
-                Server.SendDataToClient(match.Player1.ID, (int)DataTypes.PlayersTurnData, data);
+                Server.SendDataToClient(match.Player1.ClientID, (int)DataTypes.PlayersTurnData, data);
         }
 
         #endregion
+
+        #region Game Management
+
+        private int GetNewRoomNumber()
+        {
+            Random random = new Random();
+            return random.Next(1, 1000);
+        }
 
         private int[,] CreateField(int w, int h)
         {
@@ -247,5 +330,7 @@ namespace MatchServer
 
             return field;
         }
+
+        #endregion
     }
 }
