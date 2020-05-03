@@ -9,7 +9,7 @@ namespace Assets.Scripts.Match.Networking
     /// </summary>
     public class Client : IConnectionHandler
     {
-        public string IP = "10.0.0.106";
+        public string IP = "195.128.126.251";//"10.0.0.106";
         public int Port = 26950;
         public TCPConnection ClientTCP;
         public NetworkManager Manager;

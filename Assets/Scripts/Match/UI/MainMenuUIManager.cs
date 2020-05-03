@@ -33,10 +33,6 @@ namespace Assets.Scripts.Match.UI
         private const string threePlayerButton = "ThreePlayerButton";
         private const string fourPlayerButton = "FourPlayerButton";
 
-        private const string kitchenCardPackButton = "KitchenCardPackButton";
-        private const string artCardPackButton = "ArtCardPackButton";
-        private const string oceanCardPackButton = "OceanCardPackButton";
-
         private const string onlineButton = "OnlineButton";
         private const string createButton = "CreateButton";
         private const string joinButton = "JoinButton";
@@ -47,10 +43,6 @@ namespace Assets.Scripts.Match.UI
 
         private const string defaultPlayerName = "Player";
         private const string playerNamePlayerPref = "PlayerName";
-
-        private readonly CardPack kitchenCardPackage = CardPackages.Packages["KitchenPack"];
-        private readonly CardPack artCardPackage = CardPackages.Packages["ArtPack"];
-        private readonly CardPack oceanCardPackage = CardPackages.Packages["OceanPack"];
 
         private OptionsButtonsManager<CardPack> cardPacksButtons;
         private OptionsButtonsManager<int> playersCountButtons;
@@ -67,9 +59,6 @@ namespace Assets.Scripts.Match.UI
             { twoPlayerButton, null },
             { threePlayerButton, null },
             { fourPlayerButton, null },
-            { kitchenCardPackButton, null },
-            { artCardPackButton, null },
-            { oceanCardPackButton, null },
             { onlineButton, null },
             { createButton, null },
             { joinButton, null },
@@ -85,12 +74,6 @@ namespace Assets.Scripts.Match.UI
             pcbs.Add(new ButtonWrapper<int>(Buttons[threePlayerButton], 3));
             pcbs.Add(new ButtonWrapper<int>(Buttons[fourPlayerButton], 4));
             playersCountButtons = new OptionsButtonsManager<int>(pcbs, GameSettings.PlayersCount);
-
-            List<ButtonWrapper<CardPack>> cpbs = new List<ButtonWrapper<CardPack>>();
-            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[kitchenCardPackButton], kitchenCardPackage));
-            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[artCardPackButton], artCardPackage));
-            cpbs.Add(new ButtonWrapper<CardPack>(Buttons[oceanCardPackButton], oceanCardPackage));
-            cardPacksButtons = new OptionsButtonsManager<CardPack>(cpbs, GameSettings.CardPackage);
 
             onlineMenuPanel = Resources.FindObjectsOfTypeAll<Image>()
                 .FirstOrDefault(o => o.name == onlineMenuPanelName)?.gameObject;
@@ -108,9 +91,10 @@ namespace Assets.Scripts.Match.UI
         {
             if (GameSettings.CardPackage == null)
             {
-                GameSettings.CardPackage = kitchenCardPackage;
-                GameSettings.FieldWidth = kitchenCardPackage.MaxWidth;
-                GameSettings.FieldHeight = kitchenCardPackage.MaxHeight;
+                CardPack cp = CardPackages.Packages.FirstOrDefault().Value;
+                GameSettings.CardPackage = cp;
+                GameSettings.FieldWidth = cp.MaxWidth;
+                GameSettings.FieldHeight = cp.MaxHeight;
             }
         }
 
@@ -145,30 +129,6 @@ namespace Assets.Scripts.Match.UI
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
         }
 
-        public void KitchenCardPackButtonClick()
-        {
-            GameSettings.CardPackage = kitchenCardPackage;
-            GameSettings.FieldHeight = GameSettings.CardPackage.MaxHeight;
-            GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
-            cardPacksButtons.SelectOption(GameSettings.CardPackage);
-        }
-
-        public void ArtCardPackButtonClick()
-        {
-            GameSettings.CardPackage = artCardPackage;
-            GameSettings.FieldHeight = GameSettings.CardPackage.MaxHeight;
-            GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
-            cardPacksButtons.SelectOption(GameSettings.CardPackage);
-        }
-
-        public void OceanCardPackButtonClick()
-        {
-            GameSettings.CardPackage = oceanCardPackage;
-            GameSettings.FieldHeight = GameSettings.CardPackage.MaxHeight;
-            GameSettings.FieldWidth = GameSettings.CardPackage.MaxWidth;
-            cardPacksButtons.SelectOption(GameSettings.CardPackage);
-        }
-
         #endregion
 
         #region Online Menu Buttons
@@ -184,6 +144,7 @@ namespace Assets.Scripts.Match.UI
             idTextBox.gameObject.SetActive(false);
             SetInteractable(createButton, true);
             SetInteractable(joinButton, true);
+            GetComponent<CardPackUIManager>().Freeze = true;
         }
 
         public void CreateButtonClick()
@@ -236,6 +197,7 @@ namespace Assets.Scripts.Match.UI
             idTextBox.readOnly = true;
             idTextBox.text = string.Empty;
             idTextBoxPlaceholder.text = string.Empty;
+            GetComponent<CardPackUIManager>().Freeze = false;
         }
 
         public void OnPlayerNameChanged()
