@@ -8,6 +8,8 @@ namespace Assets.Scripts.Match
     {
         public static string[] PlayersNames;
 
+        public static int Difficulty = 0;
+
         public static int FieldWidth;
 
         public static int FieldHeight;

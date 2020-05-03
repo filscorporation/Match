@@ -12,5 +12,7 @@ namespace NetworkShared.Data
         public int[,] Field;
 
         public string CardPackName;
+
+        public int Difficulty;
     }
 }

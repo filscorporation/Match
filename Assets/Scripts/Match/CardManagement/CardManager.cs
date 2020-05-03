@@ -117,6 +117,9 @@ namespace Assets.Scripts.Match.CardManagement
             try
             {
                 ClearField();
+
+                SetBackground(cardPack.Name);
+
                 cards = new Card[prs.Height][];
                 cardPrefabs = GetCardPrefabs(cardPack.Name, out Vector2 cardSize);
                 if (cardPrefabs.Count < prs.Width * prs.Height / 2)
@@ -290,6 +293,8 @@ namespace Assets.Scripts.Match.CardManagement
             gameManager.Match();
             a.State = CardState.Revealed;
             b.State = CardState.Revealed;
+            gameManager.StartCoroutine(a.AnimateMatch());
+            gameManager.StartCoroutine(b.AnimateMatch());
 
             CheckForGameEnd();
         }
@@ -299,6 +304,8 @@ namespace Assets.Scripts.Match.CardManagement
             gameManager.Unmatch();
             a.State = CardState.Unactive;
             b.State = CardState.Unactive;
+            gameManager.StartCoroutine(a.AnimateUnmatch());
+            gameManager.StartCoroutine(b.AnimateUnmatch());
         }
 
         private void CheckForGameEnd()

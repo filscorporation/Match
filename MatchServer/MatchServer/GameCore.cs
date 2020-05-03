@@ -159,6 +159,7 @@ namespace MatchServer
             match.Player1 = player;
             match.RoomID = roomID;
             match.CardPackName = request.CardPack;
+            match.Difficulty = request.Difficulty;
             match.Width = request.Width;
             match.Height = request.Height;
 
@@ -223,9 +224,10 @@ namespace MatchServer
 
             Console.WriteLine($"Player {clientID} successfully joined");
 
-            int[,] field = CreateField(match.Width, match.Height);
+            int[,] field = CreateField(match.Width - match.Difficulty, match.Height - match.Difficulty);
             StartGameResponse response = new StartGameResponse();
             response.CardPackName = match.CardPackName;
+            response.Difficulty = match.Difficulty;
             response.Field = field;
             response.PlayersNames = match.GetPlayersNames();
 
@@ -260,9 +262,10 @@ namespace MatchServer
                 return;
             }
 
-            int[,] field = CreateField(match.Width, match.Height);
+            int[,] field = CreateField(match.Width - match.Difficulty, match.Height - match.Difficulty);
             StartGameResponse response = new StartGameResponse();
             response.CardPackName = match.CardPackName;
+            response.Difficulty = match.Difficulty;
             response.PlayerID = 0;
             response.Field = field;
             Server.SendDataToClient(match.Player1.ClientID, (int)DataTypes.StartGameResponse, response);

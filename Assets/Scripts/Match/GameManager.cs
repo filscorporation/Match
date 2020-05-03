@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Match.CardManagement;
@@ -34,7 +35,8 @@ namespace Assets.Scripts.Match
 
         private List<Player> players;
         private int activePlayer = 0;
-        public static List<string> DefaultPlayersNames = new List<string> //TODO: remove
+        private int activePlayerForUI = 0;
+        public static List<string> DefaultPlayersNames = new List<string>
         {
             "Player 1", "Player 2", "Player 3", "Player 4"
         };
@@ -70,7 +72,7 @@ namespace Assets.Scripts.Match
             if (GameSettings.PlayersCount == 1)
                 UIManager.DrawSinglePlayerStats(GetPlayerStats());
             else
-                UIManager.DrawPlayers(players, activePlayer);
+                UIManager.DrawPlayers(players, activePlayerForUI);
         }
 
         private bool IsGetInput()
@@ -88,7 +90,11 @@ namespace Assets.Scripts.Match
             InitializePlayerStats();
 
             CardManager = new CardManager(this);
-            FieldParams fieldParams = new FieldParams { Height = GameSettings.FieldHeight, Width = GameSettings.FieldWidth };
+            FieldParams fieldParams = new FieldParams
+            {
+                Height = GameSettings.FieldHeight,
+                Width = GameSettings.FieldWidth,
+            };
             
             if (GameSettings.IsOnline)
             {
@@ -99,6 +105,9 @@ namespace Assets.Scripts.Match
             }
             else
             {
+                fieldParams.Height -= GameSettings.Difficulty;
+                fieldParams.Width -= GameSettings.Difficulty;
+
                 CardManager.InitializeField(fieldParams, GameSettings.CardPackage);
             }
 
@@ -113,6 +122,7 @@ namespace Assets.Scripts.Match
         private void InitializePlayers(int count)
         {
             activePlayer = 0;
+            activePlayerForUI = 0;
             if (count > 4)
                 throw new NotImplementedException();
             if (GameSettings.PlayersNames?.Length > 0)
@@ -131,8 +141,12 @@ namespace Assets.Scripts.Match
             turnsPassed = 0;
             stats = new SinglePlayerStats();
             // Adding cardpack name to load highscore for current pack
-            stats.TurnsHighscore = PlayerPrefs.GetInt(turnsHighscorePlayerPref + GameSettings.CardPackage.Name, -1);
-            stats.TimeHighscore = PlayerPrefs.GetInt(timeHighscorePlayerPref + GameSettings.CardPackage.Name, -1);
+            stats.TurnsHighscore = PlayerPrefs.GetInt(
+                turnsHighscorePlayerPref + GameSettings.CardPackage.Name + GameSettings.Difficulty,
+                -1);
+            stats.TimeHighscore = PlayerPrefs.GetInt(
+                timeHighscorePlayerPref + GameSettings.CardPackage.Name + GameSettings.Difficulty,
+                -1);
         }
 
         private SinglePlayerStats GetPlayerStats()
@@ -147,12 +161,16 @@ namespace Assets.Scripts.Match
         {
             if (stats.TurnsHighscore == -1 || turnsPassed < stats.TurnsHighscore)
             {
-                PlayerPrefs.SetInt(turnsHighscorePlayerPref + GameSettings.CardPackage.Name, turnsPassed);
+                PlayerPrefs.SetInt(
+                    turnsHighscorePlayerPref + GameSettings.CardPackage.Name + GameSettings.Difficulty,
+                    turnsPassed);
                 stats.TurnsHighscore = turnsPassed;
             }
             if (stats.TimeHighscore == -1 || timePassed < stats.TimeHighscore)
             {
-                PlayerPrefs.SetInt(timeHighscorePlayerPref + GameSettings.CardPackage.Name, (int)Math.Round(timePassed));
+                PlayerPrefs.SetInt(
+                    timeHighscorePlayerPref + GameSettings.CardPackage.Name + GameSettings.Difficulty,
+                    (int)Math.Round(timePassed));
                 stats.TimeHighscore = (int)Math.Round(timePassed);
             }
         }
@@ -182,6 +200,13 @@ namespace Assets.Scripts.Match
         private void PassPlayerTurn()
         {
             activePlayer = activePlayer + 1 > players.Count - 1 ? 0 : activePlayer + 1;
+            StartCoroutine(SetActivePlayerForUI());
+        }
+
+        private IEnumerator SetActivePlayerForUI()
+        {
+            yield return new WaitForSeconds(0.6F);
+            activePlayerForUI = activePlayer;
         }
 
         public void EndGame()

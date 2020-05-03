@@ -32,6 +32,9 @@ namespace Assets.Scripts.Match.UI
         private const string twoPlayerButton = "TwoPlayerButton";
         private const string threePlayerButton = "ThreePlayerButton";
         private const string fourPlayerButton = "FourPlayerButton";
+        private const string oneStarButton = "OneStarButton";
+        private const string twoStarsButton = "TwoStarsButton";
+        private const string threeStarsButton = "ThreeStarsButton";
 
         private const string onlineButton = "OnlineButton";
         private const string createButton = "CreateButton";
@@ -46,6 +49,7 @@ namespace Assets.Scripts.Match.UI
 
         private OptionsButtonsManager<CardPack> cardPacksButtons;
         private OptionsButtonsManager<int> playersCountButtons;
+        private OptionsButtonsManager<int> starsButtons;
 
         private GameObject onlineMenuPanel;
         private InputField idTextBox;
@@ -59,6 +63,9 @@ namespace Assets.Scripts.Match.UI
             { twoPlayerButton, null },
             { threePlayerButton, null },
             { fourPlayerButton, null },
+            { oneStarButton, null },
+            { twoStarsButton, null },
+            { threeStarsButton, null },
             { onlineButton, null },
             { createButton, null },
             { joinButton, null },
@@ -74,6 +81,12 @@ namespace Assets.Scripts.Match.UI
             pcbs.Add(new ButtonWrapper<int>(Buttons[threePlayerButton], 3));
             pcbs.Add(new ButtonWrapper<int>(Buttons[fourPlayerButton], 4));
             playersCountButtons = new OptionsButtonsManager<int>(pcbs, GameSettings.PlayersCount);
+
+            List<ButtonWrapper<int>> sbs = new List<ButtonWrapper<int>>();
+            sbs.Add(new ButtonWrapper<int>(Buttons[oneStarButton], 2));
+            sbs.Add(new ButtonWrapper<int>(Buttons[twoStarsButton], 1));
+            sbs.Add(new ButtonWrapper<int>(Buttons[threeStarsButton], 0));
+            starsButtons = new OptionsButtonsManager<int>(sbs, GameSettings.Difficulty);
 
             onlineMenuPanel = Resources.FindObjectsOfTypeAll<Image>()
                 .FirstOrDefault(o => o.name == onlineMenuPanelName)?.gameObject;
@@ -127,6 +140,24 @@ namespace Assets.Scripts.Match.UI
         {
             GameSettings.PlayersCount = 4;
             playersCountButtons.SelectOption(GameSettings.PlayersCount);
+        }
+
+        public void OneStarButtonClick()
+        {
+            GameSettings.Difficulty = 2;
+            starsButtons.SelectOption(GameSettings.Difficulty);
+        }
+
+        public void TwoStarsButtonClick()
+        {
+            GameSettings.Difficulty = 1;
+            starsButtons.SelectOption(GameSettings.Difficulty);
+        }
+
+        public void ThreeStarsButtonClick()
+        {
+            GameSettings.Difficulty = 0;
+            starsButtons.SelectOption(GameSettings.Difficulty);
         }
 
         #endregion

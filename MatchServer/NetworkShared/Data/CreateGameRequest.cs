@@ -9,6 +9,8 @@ namespace NetworkShared.Data
 
         public string CardPack;
 
+        public int Difficulty;
+
         public int Width;
 
         public int Height;

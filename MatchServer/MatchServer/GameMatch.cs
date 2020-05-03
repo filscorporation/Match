@@ -6,6 +6,8 @@
 
         public string CardPackName;
 
+        public int Difficulty;
+
         public int Width;
 
         public int Height;

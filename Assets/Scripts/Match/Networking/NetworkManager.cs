@@ -50,6 +50,7 @@ namespace Assets.Scripts.Match.Networking
             CreateGameRequest request = new CreateGameRequest();
             request.PlayerName = playerName;
             request.CardPack = GameSettings.CardPackage.Name;
+            request.Difficulty = GameSettings.Difficulty;
             request.Width = GameSettings.CardPackage.MaxWidth;
             request.Height = GameSettings.CardPackage.MaxHeight;
 
@@ -107,6 +108,7 @@ namespace Assets.Scripts.Match.Networking
                     GameSettings.IsOnline = true;
                     GameSettings.PlayerID = startGameResponse.PlayerID;
                     GameSettings.CardPackage = CardPackages.Packages[startGameResponse.CardPackName];
+                    GameSettings.Difficulty = startGameResponse.Difficulty;
                     GameSettings.FieldHeight = startGameResponse.Field.GetLength(0);
                     GameSettings.FieldWidth = startGameResponse.Field.GetLength(1);
                     GameSettings.FieldData = startGameResponse.Field;

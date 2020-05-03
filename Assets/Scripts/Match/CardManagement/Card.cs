@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Assets.Scripts.Match.CardManagement
@@ -22,6 +23,9 @@ namespace Assets.Scripts.Match.CardManagement
         private const float rotationDelay = 1F;
         private float rotationDelayTimer = 0F;
 
+        private bool isAnimating = false;
+        private float scale = 1.1F;
+
         public CardState State
         {
             get => state;
@@ -43,6 +47,11 @@ namespace Assets.Scripts.Match.CardManagement
             this.state = state;
         }
 
+        public void Update()
+        {
+            RotateToState();
+        }
+
         protected void Reveal()
         {
             Debug.Log($"Reveal card {Index}");
@@ -53,11 +62,6 @@ namespace Assets.Scripts.Match.CardManagement
         {
             Debug.Log($"Hide card {Index}");
             rotationDelayTimer = rotationDelay;
-        }
-
-        public void Update()
-        {
-            RotateToState();
         }
 
         private void RotateToState()
@@ -73,6 +77,36 @@ namespace Assets.Scripts.Match.CardManagement
                 target = Quaternion.Euler(0, 180, 0);
             }
             transform.rotation = Quaternion.Slerp(transform.rotation, target, rotationSpeed);
+        }
+
+        public IEnumerator AnimateMatch()
+        {
+            if (isAnimating)
+                yield break;
+
+            isAnimating = true;
+            yield return new WaitForSeconds(0.6F);
+            float s = transform.localScale.x * scale;
+            transform.localScale = new Vector3(s, s, s);
+            yield return new WaitForSeconds(0.2F);
+            s = transform.localScale.x / scale;
+            transform.localScale = new Vector3(s, s, s);
+            isAnimating = false;
+        }
+
+        public IEnumerator AnimateUnmatch()
+        {
+            if (isAnimating)
+                yield break;
+
+            isAnimating = true;
+            yield return new WaitForSeconds(0.6F);
+            float s = transform.localScale.x / scale;
+            transform.localScale = new Vector3(s, s, s);
+            yield return new WaitForSeconds(0.2F);
+            s = transform.localScale.x * scale;
+            transform.localScale = new Vector3(s, s, s);
+            isAnimating = false;
         }
     }
 }
