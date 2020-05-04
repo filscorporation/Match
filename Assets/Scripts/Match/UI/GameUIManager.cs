@@ -30,6 +30,7 @@ namespace Assets.Scripts.Match.UI
         private bool uiMode = false;
         private GameObject activePlayerFrame;
         private Dictionary<string, Text> playersTexts;
+        private Color playersTextsColor;
 
         /// <summary>
         /// Check if UI menu is opened
@@ -77,6 +78,7 @@ namespace Assets.Scripts.Match.UI
                     Player player = players[index];
                     Text text = elements.First(t => t.gameObject.name == GameManager.DefaultPlayersNames[index] + " Text");
                     text.gameObject.SetActive(true);
+                    text.color = playersTextsColor;
                     playersTexts.Add(player.Name, text);
                 }
             }
@@ -111,6 +113,15 @@ namespace Assets.Scripts.Match.UI
                 string thString = th.ToString("mm':'ss");
                 timeMeterText.text += $" (Best: {thString})";
             }
+        }
+
+        /// <summary>
+        /// Sets color of players texts
+        /// </summary>
+        /// <param name="color"></param>
+        public void SetPlayerTextColor(Color color)
+        {
+            playersTextsColor = color;
         }
 
         private void ToUIMode()

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Assets.Scripts.Match.Exceptions;
 using Assets.Scripts.Match.InputManagement;
 using Assets.Scripts.Match.Networking;
+using Assets.Scripts.Match.UI;
 using NetworkShared.Data;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -30,7 +31,7 @@ namespace Assets.Scripts.Match.CardManagement
         private const string backgroundFileName = "Background";
 
         private bool isAnimating = false;
-        private const float cardAnimationLength = 0.6F;
+        private const float cardAnimationLength = 0.4F;
         public AudioClip AudioClip;
 
         private const string soundFolderName = "Sounds";
@@ -60,6 +61,7 @@ namespace Assets.Scripts.Match.CardManagement
                 ClearField();
 
                 SetBackground(cardPack.Name);
+                gameManager.UIManager.SetPlayerTextColor(cardPack.PlayerTextColor);
 
                 cards = new Card[prs.Height][];
                 cardPrefabs = GetCardPrefabs(cardPack.Name, out Vector2 cardSize);
@@ -119,6 +121,7 @@ namespace Assets.Scripts.Match.CardManagement
                 ClearField();
 
                 SetBackground(cardPack.Name);
+                gameManager.UIManager.SetPlayerTextColor(cardPack.PlayerTextColor);
 
                 cards = new Card[prs.Height][];
                 cardPrefabs = GetCardPrefabs(cardPack.Name, out Vector2 cardSize);

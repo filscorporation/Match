@@ -86,6 +86,8 @@ namespace Assets.Scripts.Match
 
         public void StartGame()
         {
+            UIManager = FindObjectOfType<GameUIManager>();
+
             InitializePlayers(GameSettings.PlayersCount);
             InitializePlayerStats();
 
@@ -113,7 +115,6 @@ namespace Assets.Scripts.Match
 
             InputManager = new PCInputManager();
             InputManager.AddSubscriber(CardManager);
-            UIManager = FindObjectOfType<GameUIManager>();
 
             isInGame = true;
             isInitialized = true;

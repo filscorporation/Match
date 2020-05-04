@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Assets.Scripts.Match.CardManagement
 {
@@ -15,11 +16,14 @@ namespace Assets.Scripts.Match.CardManagement
 
         public readonly int MaxHeight;
 
-        public CardPack(string name, int maxWidth, int maxHeight)
+        public Color PlayerTextColor;
+
+        public CardPack(string name, int maxWidth, int maxHeight, Color playerTextColor)
         {
             Name = name;
             MaxWidth = maxWidth;
             MaxHeight = maxHeight;
+            PlayerTextColor = playerTextColor;
         }
 
         public override bool Equals(object obj)
