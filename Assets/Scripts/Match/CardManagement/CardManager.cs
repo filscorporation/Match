@@ -32,12 +32,15 @@ namespace Assets.Scripts.Match.CardManagement
 
         private bool isAnimating = false;
         private const float cardAnimationLength = 0.4F;
-        public AudioClip AudioClip;
 
         private const string soundFolderName = "Sounds";
         private AudioSource audioSource;
-        private const string cardFlipSoundName = "CardFlipSound";
+        private const string cardFlipSoundName = "FlipSound";
         private AudioClip cardFlipSound;
+        private const string cardFlipBackSoundName = "FlipBackSound";
+        private AudioClip cardFlipBackSound;
+        private const string matchSoundName = "MatchSound";
+        private AudioClip matchSound;
 
         private const string backgroundObjectName = "Background";
 
@@ -225,27 +228,29 @@ namespace Assets.Scripts.Match.CardManagement
                 {
                     isAnimating = true;
                     PlayCardFlipSound();
-                    Task.Run(() =>
-                    {
-                        Thread.Sleep((int)(cardAnimationLength * 1000));
-                        isAnimating = false;
-                    });
+                    gameManager.StartCoroutine(EndAnimating());
 
                     if (lastActive.Index == card.Index)
                     {
                         Debug.Log($"Match");
                         Match(lastActive, card);
+                        gameManager.StartCoroutine(PlayMatchSound(0.65F));
                     }
                     else
                     {
                         Debug.Log($"Unmatch");
                         Unmatch(lastActive, card);
-                        // TODO: remove
-                        gameManager.StartCoroutine(PlayCardFlipSound(1F));
+                        gameManager.StartCoroutine(PlayCardFlipBackSound(1F));
                     }
                     lastActive = null;
                 }
             }
+        }
+
+        private IEnumerator EndAnimating()
+        {
+            yield return new WaitForSeconds(cardAnimationLength);
+            isAnimating = false;
         }
 
         private void SetBackground(string cardPackName)
@@ -277,18 +282,25 @@ namespace Assets.Scripts.Match.CardManagement
             }
 
             cardFlipSound = Resources.Load<AudioClip>(Path.Combine(soundFolderName, cardFlipSoundName));
+            cardFlipBackSound = Resources.Load<AudioClip>(Path.Combine(soundFolderName, cardFlipBackSoundName));
+            matchSound = Resources.Load<AudioClip>(Path.Combine(soundFolderName, matchSoundName));
         }
 
         private void PlayCardFlipSound()
         {
-            Debug.Log("Playing");
             audioSource.PlayOneShot(cardFlipSound);
         }
 
-        IEnumerator PlayCardFlipSound(float delay)
+        private IEnumerator PlayCardFlipBackSound(float delay)
         {
             yield return new WaitForSeconds(delay);
-            audioSource.PlayOneShot(cardFlipSound);
+            audioSource.PlayOneShot(cardFlipBackSound, 4F);
+        }
+
+        private IEnumerator PlayMatchSound(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            audioSource.PlayOneShot(matchSound);
         }
 
         private void Match(Card a, Card b)

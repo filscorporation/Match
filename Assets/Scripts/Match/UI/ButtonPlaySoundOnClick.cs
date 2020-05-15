@@ -13,6 +13,8 @@ namespace Assets.Scripts.Match.UI
 
         private AudioSource source;
 
+        public float Volume = 0.2F;
+
         public void Start()
         {
             source = Resources.FindObjectsOfTypeAll<AudioSource>().FirstOrDefault();
@@ -28,7 +30,7 @@ namespace Assets.Scripts.Match.UI
 
         private void ButtonOnClick()
         {
-            source.PlayOneShot(AudioClip);
+            source.PlayOneShot(AudioClip, Volume);
         }
     }
 }

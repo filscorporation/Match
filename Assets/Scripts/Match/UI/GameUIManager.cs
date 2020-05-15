@@ -102,11 +102,16 @@ namespace Assets.Scripts.Match.UI
             turnsCounterText.gameObject.SetActive(true);
             timeMeterText.gameObject.SetActive(true);
             turnsCounterText.text = $"Turns: {stats.Turns}";
+            turnsCounterText.color = playersTextsColor;
             if (stats.TurnsHighscore != -1)
+            {
                 turnsCounterText.text += $" (Best: {stats.TurnsHighscore})";
+                turnsCounterText.color = playersTextsColor;
+            }
             TimeSpan tt = TimeSpan.FromSeconds(stats.Time);
             string ttString = tt.ToString("mm':'ss");
             timeMeterText.text = $"Time: {ttString}";
+            timeMeterText.color = playersTextsColor;
             if (stats.TimeHighscore != -1)
             {
                 TimeSpan th = TimeSpan.FromSeconds(stats.TimeHighscore);
