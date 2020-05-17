@@ -359,23 +359,23 @@ namespace Assets.Scripts.Match.CardManagement
             return prefabs;
         }
 
-        private Vector2 GetCardPosition(int widthAmount, int heigthAmount, float screenWidth, float screenHeigth, int i, int j, Vector2 cardSize)
+        private Vector2 GetCardPosition(int widthAmount, int heightAmount, float screenWidth, float screenHeight, int i, int j, Vector2 cardSize)
         {
             // Even placement strategy
             //float x = screenWidth / (widthAmount + 1) * (i + 1);
-            //float y = screenHeigth / (heigthAmount + 1) * (j + 1);
+            //float y = screenHeight / (heightAmount + 1) * (j + 1);
 
             // Dense
             float gapIndex = 1.05F;
             float yOffset = 0.5F;
             float x = (i - (float)widthAmount / 2 + 0.5F) * cardSize.x * gapIndex;
-            float y = (j - (float)heigthAmount / 2 + 0.5F) * cardSize.y * gapIndex - yOffset;
+            float y = (j - (float)heightAmount / 2 + 0.5F) * cardSize.y * gapIndex - yOffset;
             return new Vector3(x, y);
         }
 
-        private float GetCardScale(int widthAmount, int heigthAmount, float screenWidth, float screenHeigth)
+        private float GetCardScale(int widthAmount, int heightAmount, float screenWidth, float screenHeight)
         {
-            return Math.Min(portraitScaleFactor / widthAmount, portraitScaleFactor / heigthAmount);
+            return Math.Min(portraitScaleFactor / widthAmount, portraitScaleFactor / heightAmount);
         }
 
         private Card CreateCard(Object prefab, Vector2 position, float scale, int index)

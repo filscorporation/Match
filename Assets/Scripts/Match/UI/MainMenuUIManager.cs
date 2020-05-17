@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Match.CardManagement;
 using Assets.Scripts.Match.Networking;
@@ -55,6 +56,9 @@ namespace Assets.Scripts.Match.UI
         private InputField idTextBox;
         private Text idTextBoxPlaceholder;
         private InputField playerNameTextBox;
+        public GameObject Background;
+
+        public GameObject AboutInfo;
 
         protected override Dictionary<string, Button> Buttons { get; set; } = new Dictionary<string, Button>
         {
@@ -97,6 +101,8 @@ namespace Assets.Scripts.Match.UI
             playerNameTextBox = Resources.FindObjectsOfTypeAll<InputField>()
                 .FirstOrDefault(o => o.name == playerNameTextBoxName);
 
+            SetBackgroundSize();
+
             playerNameTextBox.text = GetPlayerName();
         }
 
@@ -109,6 +115,21 @@ namespace Assets.Scripts.Match.UI
                 GameSettings.FieldWidth = cp.MaxWidth;
                 GameSettings.FieldHeight = cp.MaxHeight;
             }
+        }
+
+        private void SetBackgroundSize()
+        {
+            SpriteRenderer sr = Background.GetComponent<SpriteRenderer>();
+            Background.transform.localScale = new Vector3(1, 1, 1);
+
+            float width = sr.sprite.bounds.size.x;
+            float height = sr.sprite.bounds.size.y;
+
+            float worldScreenHeight = Camera.main.orthographicSize * 2.0F;
+            float worldScreenWidth = worldScreenHeight / Screen.height * Screen.width;
+            float scale = Math.Max(worldScreenWidth / width, worldScreenHeight / height);
+
+            Background.transform.localScale = new Vector2(scale, scale);
         }
 
         #region Base Menu Buttons
@@ -158,6 +179,11 @@ namespace Assets.Scripts.Match.UI
         {
             GameSettings.Difficulty = 0;
             starsButtons.SelectOption(GameSettings.Difficulty);
+        }
+
+        public void AboutButtonClick()
+        {
+            AboutInfo.SetActive(!AboutInfo.activeSelf);
         }
 
         #endregion

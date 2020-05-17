@@ -4,6 +4,7 @@ using System.Linq;
 using Assets.Scripts.Match.CardManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
 
 namespace Assets.Scripts.Match.UI
@@ -20,6 +21,18 @@ namespace Assets.Scripts.Match.UI
         private RectTransform contentObjectRect;
         public GameObject PreviewPrefab;
 
+        private bool isBigPreviewActive = false;
+        public GameObject BigPreview;
+        public GameObject BigPreviewPrefab;
+        public GameObject BigPreviewContentObject;
+        public RectTransform BigPreviewContentObjectRect;
+        private const float bigPreviewCardOffsetX = 55F;
+        private const float bigPreviewCardOffsetY = 112F;
+        private const float bigPreviewCardSizeX = 1220F;
+        private const float bigPreviewCardSizeY = 1830F;
+        private const float bigPreviewContentOffset = 0;
+
+        private const string cardsFolder = "Cards";
         private const string cardPacksFolder = "CardPacks";
         private const string previewFileName = "Preview";
         private const string swipeTag = "Swipe";
@@ -33,10 +46,13 @@ namespace Assets.Scripts.Match.UI
         private const float contentOffset = -32F;
 
         private int currentPack;
+        private List<GameObject> previewCards = new List<GameObject>();
+        private int currentCard = 0;
 
         public void Start()
         {
             contentObjectRect = ContentObject.GetComponent<RectTransform>();
+            BigPreviewContentObjectRect = BigPreviewContentObject.GetComponent<RectTransform>();
             FillContent();
 
             SetPack(CardPackages.Packages.Values.ToList().IndexOf(GameSettings.CardPackage), true);
@@ -99,10 +115,20 @@ namespace Assets.Scripts.Match.UI
 
         private void MoveToCurrent()
         {
-            contentObjectRect.anchoredPosition = Vector3.Lerp(
-                contentObjectRect.anchoredPosition,
-                GetPackTargetPosition(currentPack),
-                Time.deltaTime * swipeSpeed);
+            if (isBigPreviewActive)
+            {
+                BigPreviewContentObjectRect.anchoredPosition = Vector3.Lerp(
+                    BigPreviewContentObjectRect.anchoredPosition,
+                    GetCardTargetPosition(currentCard),
+                    Time.deltaTime * swipeSpeed);
+            }
+            else
+            {
+                contentObjectRect.anchoredPosition = Vector3.Lerp(
+                    contentObjectRect.anchoredPosition,
+                    GetPackTargetPosition(currentPack),
+                    Time.deltaTime * swipeSpeed);
+            }
         }
 
         private void Drag(Vector2 inputPoint)
@@ -112,8 +138,16 @@ namespace Assets.Scripts.Match.UI
 
             float dx = swipeStartPoint.Value.x - inputPoint.x;
             lastX = inputPoint.x;
-            Vector2 target = GetPackTargetPosition(currentPack);
-            contentObjectRect.anchoredPosition = target - new Vector2(dx, 0);
+            if (isBigPreviewActive)
+            {
+                Vector2 target = GetCardTargetPosition(currentCard);
+                BigPreviewContentObjectRect.anchoredPosition = target - new Vector2(dx, 0);
+            }
+            else
+            {
+                Vector2 target = GetPackTargetPosition(currentPack);
+                contentObjectRect.anchoredPosition = target - new Vector2(dx, 0);
+            }
         }
 
         /// <summary>
@@ -136,6 +170,23 @@ namespace Assets.Scripts.Match.UI
         private Vector2 GetPackTargetPosition(int id)
         {
             return new Vector2(contentOffset - id * (cardPackPreviewOffset + cardPackPreviewSize), 0);
+        }
+
+        /// <summary>
+        /// Sets focus on preview of card by its id
+        /// </summary>
+        /// <param name="id"></param>
+        public void SetCard(int id)
+        {
+            if (id < 0 || id >= previewCards.Count)
+                return;
+
+            currentCard = id;
+        }
+
+        private Vector2 GetCardTargetPosition(int id)
+        {
+            return new Vector2(bigPreviewContentOffset - id * (bigPreviewCardOffsetX + bigPreviewCardSizeX), 0);
         }
 
         /// <summary>
@@ -169,10 +220,18 @@ namespace Assets.Scripts.Match.UI
             if (Vector2.Distance(inputPoint, swipeStartPoint.Value) > minSwipeDistance)
             {
                 Direction direction = GetDirection(swipeStartPoint.Value.x, inputPoint.x);
-                SetPack(direction == Direction.Left ? currentPack + 1 : currentPack - 1);
+
+                if (isBigPreviewActive)
+                {
+                    SetCard(direction == Direction.Left ? currentCard + 1 : currentCard - 1);
+                }
+                else
+                {
+                    SetPack(direction == Direction.Left ? currentPack + 1 : currentPack - 1);
+                }
+
                 float dx = Mathf.Abs(inputPoint.x - lastX);
                 swipeSpeed = Mathf.Max(dx * baseSwipeSpeed, minSwipeSpeed);
-
                 swipeStartPoint = null;
                 return true;
             }
@@ -207,6 +266,10 @@ namespace Assets.Scripts.Match.UI
                 RectTransform cprt = go.GetComponent<RectTransform>();
                 cprt.sizeDelta = new Vector2(cardPackPreviewSize, cardPackPreviewSize);
                 cprt.anchoredPosition = new Vector2(x, cardPackPreviewOffset);
+                go.transform.localScale = new Vector3(1, 1, 1);
+
+                Button previewButton = go.transform.GetChild(0).GetComponent<Button>();
+                previewButton.onClick.AddListener(() => OnPreviewButtonClick(pair.Key));
 
                 contentSize += cardPackPreviewSize + cardPackPreviewOffset;
             }
@@ -214,6 +277,56 @@ namespace Assets.Scripts.Match.UI
 
             RectTransform rt = ContentObject.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(contentSize, rt.sizeDelta.y);
+        }
+
+        public void BigPreviewBackButtonClick()
+        {
+            isBigPreviewActive = false;
+
+            foreach (GameObject previewCard in previewCards)
+            {
+                Destroy(previewCard);
+            }
+
+            BigPreviewContentObjectRect.anchoredPosition = new Vector2(bigPreviewContentOffset, 0);
+            previewCards.Clear();
+            currentCard = 0;
+
+            BigPreview.SetActive(false);
+        }
+
+        private void OnPreviewButtonClick(string packName)
+        {
+            isBigPreviewActive = true;
+
+            float contentSize = 0F;
+
+            foreach (Sprite cardSprite in GetPackSprites(packName))
+            {
+                GameObject go = Instantiate(BigPreviewPrefab);
+                go.transform.SetParent(BigPreviewContentObject.transform);
+                go.GetComponent<Image>().sprite = cardSprite;
+                float x = contentSize + bigPreviewCardOffsetX;
+                RectTransform cprt = go.GetComponent<RectTransform>();
+                cprt.sizeDelta = new Vector2(bigPreviewCardSizeX, bigPreviewCardSizeY);
+                cprt.anchoredPosition = new Vector2(x, bigPreviewCardOffsetY);
+                go.transform.localScale = new Vector3(1, 1, 1);
+
+                previewCards.Add(go);
+
+                contentSize += bigPreviewCardSizeX + bigPreviewCardOffsetX;
+            }
+            contentSize += bigPreviewCardOffsetX;
+
+            RectTransform rt = BigPreviewContentObject.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(contentSize, rt.sizeDelta.y);
+
+            BigPreview.SetActive(true);
+        }
+
+        private Sprite[] GetPackSprites(string packName)
+        {
+            return Resources.LoadAll<Sprite>(Path.Combine(cardPacksFolder, packName, cardsFolder));
         }
 
         private Sprite GetPreviewFromCardPackName(string cardPackName)

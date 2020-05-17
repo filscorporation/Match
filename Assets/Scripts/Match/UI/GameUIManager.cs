@@ -50,10 +50,10 @@ namespace Assets.Scripts.Match.UI
         {
             CanvasRenderer[] elements = Resources.FindObjectsOfTypeAll<CanvasRenderer>();
             blur = elements.FirstOrDefault(o => o.name == blurImageName).gameObject;
-            if (blur != null)
-            {
-                blur.GetComponent<Image>().rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
-            }
+            //if (blur != null)
+            //{
+            //    blur.GetComponent<Image>().rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
+            //}
             activePlayerFrame = elements.FirstOrDefault(o => o.name == activePlayerFrameName).gameObject;
 
             turnsCounterText = elements.FirstOrDefault(o => o.name == turnsCounterTextName).gameObject.GetComponent<Text>();
