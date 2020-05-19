@@ -154,6 +154,8 @@ namespace Assets.Scripts.Match.UI
             Disable(backButton);
             Enable(toMainMenuButton);
             Enable(restartButton);
+
+            StartCoroutine(AdsManager.Instance.ShowBannerWhenReady());
         }
 
         public void BackButtonClick()
@@ -162,10 +164,13 @@ namespace Assets.Scripts.Match.UI
             Disable(backButton);
             Disable(toMainMenuButton);
             Enable(menuButton);
+
+            AdsManager.Instance.HideBanner();
         }
 
         public void ToMainMenuButtonClick()
         {
+            AdsManager.Instance.HideBanner();
             SceneManager.LoadScene(mainMenuSceneName);
         }
 
@@ -175,10 +180,13 @@ namespace Assets.Scripts.Match.UI
             Disable(menuButton);
             Enable(backButton);
             Enable(toMainMenuButton);
+
+            StartCoroutine(AdsManager.Instance.ShowBannerWhenReady());
         }
 
         public void RestartButtonClick()
         {
+            AdsManager.Instance.HideBanner();
             if (GameSettings.IsOnline)
             {
                 NetworkManager.Instance.RestartGame();
